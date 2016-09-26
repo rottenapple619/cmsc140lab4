@@ -35,11 +35,11 @@ public class OutgoingListener extends Thread{
         if(!node.isServer()){
             try {
                 send(Messages.FINDSUCCESSOR
-                        +Messages.REGEX+node.getInitiatorID()
-                        +Messages.REGEX+node.getInitiatorPort()
+                        +Messages.REGEX+node.getReference().getInitiatorID()
+                        +Messages.REGEX+node.getReference().getInitiatorPort()
                         +Messages.REGEX+node.getID()
                         +Messages.REGEX+node.getPort(),
-                        InetAddress.getLocalHost()/*InetAddress.getByName(node.getInitiatorID())*/,node.getInitiatorPort());
+                        InetAddress.getLocalHost()/*InetAddress.getByName(node.getInitiatorID())*/,node.getReference().getInitiatorPort());
             } catch (UnknownHostException ex) {
                 Logger.getLogger(OutgoingListener.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -50,7 +50,7 @@ public class FileObj implements Serializable{
     }
 
     private int getRandomID() {
-        return (int)(Math.random()*1000)+1;
+        return (int)(Math.random()*1024);
     }
     
     public int getID(){

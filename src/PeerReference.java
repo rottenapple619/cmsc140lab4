@@ -18,8 +18,8 @@ public class PeerReference extends NodeReference{
         super(ID,port,address);
     }
     
-    public String getID(){
-        return this.getReference(PEER_ID);
+    public int getID(){
+        return Integer.parseInt(this.getReference(PEER_ID));
     }
     
     public int getPort(){

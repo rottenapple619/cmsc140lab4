@@ -39,14 +39,14 @@ public class PeerProtocol implements Messages{
             int successorPORT = Integer.parseInt(msg[6]);
             
             PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
-            peer.setPID(predecessorID);
-            peer.setPredecessorPort(predecessorPORT);
-            peer.setSID(successorID);
-            peer.setSuccessorPort(successorPORT);
+            peer.getReference().updatePredID(predecessorID+"");
+            peer.getReference().updatePredPort(predecessorPORT+"");
+            peer.getReference().updateSucID(successorID+"");
+            peer.getReference().updateSucPort(successorPORT+"");
             
             peer.getOutgoing().send(TELLPREDECESSOR
-                    +REGEX+peer.getInitiatorID()        //network ID
-                    +REGEX+peer.getInitiatorPort()
+                    +REGEX+peer.getReference().getInitiatorID()        //network ID
+                    +REGEX+peer.getReference().getInitiatorPort()
                     +REGEX+peer.getID()                 //receiver's predecessor
                     +REGEX+peer.getPort(),
                     InetAddress.getLocalHost(), successorPORT);
@@ -66,8 +66,8 @@ public class PeerProtocol implements Messages{
             int predecessorPORT = Integer.parseInt(msg[4]);
             
             PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
-            peer.setPID(predecessorID);
-            peer.setPredecessorPort(predecessorPORT);
+            peer.getReference().updatePredID(predecessorID+"");
+            peer.getReference().updatePredPort(predecessorPORT+"");
             
             printStatus(peer);
         }
@@ -100,11 +100,11 @@ public class PeerProtocol implements Messages{
             
             PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
 
-            if(peer.getPredecessorID() == 0){ //P2P Network in initial state
-                peer.setPID(joinID);
-                peer.setPredecessorPort(joinPORT);
-                peer.setSID(joinID);
-                peer.setSuccessorPort(joinPORT);
+            if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
+                peer.getReference().updatePredID(joinID+"");
+                peer.getReference().updatePredPort(joinPORT+"");
+                peer.getReference().updateSucID(joinID+"");
+                peer.getReference().updateSucPort(joinPORT+"");
                 peer.getOutgoing().send(TELLSUCCESSOR 
                     +REGEX+netID                //net ID
                     +REGEX+netPORT
@@ -139,18 +139,18 @@ public class PeerProtocol implements Messages{
                 
             }
             else{//P2P Network in populated state
-                if((joinID > peer.getID() && joinID <= peer.getSuccessorID()) //amazing Lyle
-                    || (peer.getID() > peer.getSuccessorID() && (joinID > peer.getID() || joinID < peer.getSuccessorID()))){
+                if((joinID > peer.getID() && joinID <= peer.getReference().getSuccessorID()) //amazing Lyle
+                    || (peer.getID() > peer.getReference().getSuccessorID() && (joinID > peer.getID() || joinID < peer.getReference().getSuccessorID()))){
                     peer.getOutgoing().send(TELLSUCCESSOR 
                         +REGEX+netID                         //network id
                         +REGEX+netPORT
                         +REGEX+peer.getID()                 //receiver's predecessor
                         +REGEX+peer.getPort()
-                        +REGEX+peer.getSuccessorID()        //receiver's successor
-                        +REGEX+peer.getSuccessorPort(),
+                        +REGEX+peer.getReference().getSuccessorID()        //receiver's successor
+                        +REGEX+peer.getReference().getSuccessorPort(),
                         InetAddress.getLocalHost(), joinPORT);
-                    peer.setSID(joinID);
-                    peer.setSuccessorPort(joinPORT);
+                    peer.getReference().updateSucID(joinID+"");
+                    peer.getReference().updateSucPort(joinPORT+"");
                     printStatus(peer);
                     
                     //TRANSFER CUSTODY OF REGISTERED FILES//
@@ -182,7 +182,7 @@ public class PeerProtocol implements Messages{
                         +REGEX+netPORT
                         +REGEX+joinID                   
                         +REGEX+joinPORT,
-                        InetAddress.getLocalHost(), peer.getSuccessorPort());
+                        InetAddress.getLocalHost(), peer.getReference().getSuccessorPort());
 
                 } 
             }
@@ -204,21 +204,21 @@ public class PeerProtocol implements Messages{
             
             PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
             
-            if(peer.getPredecessorID() == 0){ //P2P Network in initial state
+            if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
                 peer.addToReferencedFiles(new FileReference(fileID,fileName,publisherID,publisherPORT));
                 
                 Connections.getConnection().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
                     +Messages.REGEX+peer.getID()                                                        //published
                     +Messages.REGEX+peer.getPort()
-                    +Messages.REGEX+peer.getInitiatorID()
-                    +Messages.REGEX+peer.getInitiatorPort()
+                    +Messages.REGEX+peer.getReference().getInitiatorID()
+                    +Messages.REGEX+peer.getReference().getInitiatorPort()
                     +Messages.REGEX+fileName
                     +Messages.REGEX+fileID);
 
             }
             else{//P2P Network in populated state
-                if((fileID > peer.getID() && fileID <= peer.getSuccessorID()) //amazing Lyle
-                    || (peer.getID() > peer.getSuccessorID() && (fileID > peer.getID() || fileID < peer.getSuccessorID()))){
+                if((fileID > peer.getID() && fileID <= peer.getReference().getSuccessorID()) //amazing Lyle
+                    || (peer.getID() > peer.getReference().getSuccessorID() && (fileID > peer.getID() || fileID < peer.getReference().getSuccessorID()))){
                     
                     peer.addToReferencedFiles(new FileReference(fileID,fileName,publisherID,publisherPORT));
                     
@@ -236,8 +236,8 @@ public class PeerProtocol implements Messages{
                         Connections.getConnection().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
                             +Messages.REGEX+peer.getID()                                                        //published
                             +Messages.REGEX+peer.getPort()
-                            +Messages.REGEX+peer.getInitiatorID()
-                            +Messages.REGEX+peer.getInitiatorPort()
+                            +Messages.REGEX+peer.getReference().getInitiatorID()
+                            +Messages.REGEX+peer.getReference().getInitiatorPort()
                             +Messages.REGEX+fileName
                             +Messages.REGEX+fileID);
                     }
@@ -250,7 +250,7 @@ public class PeerProtocol implements Messages{
                         +REGEX+publisherPORT
                         +REGEX+fileID               //file ID
                         +REGEX+fileName,            //file Name
-                        InetAddress.getLocalHost(), peer.getSuccessorPort()); //send to successor
+                        InetAddress.getLocalHost(), peer.getReference().getSuccessorPort()); //send to successor
 
                 } 
             }
@@ -278,8 +278,8 @@ public class PeerProtocol implements Messages{
             Connections.getConnection().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
                 +Messages.REGEX+referencedID                                                          //published
                 +Messages.REGEX+referencedPORT
-                +Messages.REGEX+peer.getInitiatorID()
-                +Messages.REGEX+peer.getInitiatorPort()
+                +Messages.REGEX+peer.getReference().getInitiatorID()
+                +Messages.REGEX+peer.getReference().getInitiatorPort()
                 +Messages.REGEX+fileName
                 +Messages.REGEX+fileID);
             
@@ -299,7 +299,7 @@ public class PeerProtocol implements Messages{
             
             FileReference fr;
             
-            if(peer.getPredecessorID() == 0){ //P2P Network in initial state
+            if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
                
                 if((fr = peer.deleteReference(fileID)) != null){
                     peer.deleteNetworkFile(fr.getID());
@@ -320,8 +320,8 @@ public class PeerProtocol implements Messages{
 
             }
             else{//P2P Network in populated state
-                if((fileID > peer.getID() && fileID <= peer.getSuccessorID()) //amazing Lyle
-                    || (peer.getID() > peer.getSuccessorID() && (fileID > peer.getID() || fileID < peer.getSuccessorID()))){
+                if((fileID > peer.getID() && fileID <= peer.getReference().getSuccessorID()) //amazing Lyle
+                    || (peer.getID() > peer.getReference().getSuccessorID() && (fileID > peer.getID() || fileID < peer.getReference().getSuccessorID()))){
                     
                     if((fr = peer.deleteReference(fileID)) != null){//successful delete
                         
@@ -373,7 +373,7 @@ public class PeerProtocol implements Messages{
                         +REGEX+senderID
                         +REGEX+senderPORT
                         +REGEX+fileID,
-                        InetAddress.getLocalHost(), peer.getSuccessorPort());
+                        InetAddress.getLocalHost(), peer.getReference().getSuccessorPort());
                 }
             }
         }
@@ -447,7 +447,7 @@ public class PeerProtocol implements Messages{
             
             PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
             
-            if(peer.getPredecessorID() == 0){ //P2P Network in initial state
+            if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
                 
                 Iterator entries = peer.getReferencedFiles().entrySet().iterator();
                 while (entries.hasNext()) {//iterate through the files that are registered to you
@@ -482,7 +482,7 @@ public class PeerProtocol implements Messages{
                             +REGEX+netPORT
                             +REGEX+senderID
                             +REGEX+senderPORT, 
-                            InetAddress.getLocalHost(), peer.getSuccessorPort());//sent to your SUCCESSOR
+                            InetAddress.getLocalHost(), peer.getReference().getSuccessorPort());//sent to your SUCCESSOR
 
                     }
                     else{
@@ -511,7 +511,7 @@ public class PeerProtocol implements Messages{
                         +REGEX+netPORT
                         +REGEX+senderID
                         +REGEX+senderPORT, 
-                        InetAddress.getLocalHost(), peer.getSuccessorPort());//sent to your SUCCESSOR
+                        InetAddress.getLocalHost(), peer.getReference().getSuccessorPort());//sent to your SUCCESSOR
                 }
 
             }
@@ -549,7 +549,7 @@ public class PeerProtocol implements Messages{
             PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
             FileReference f;
             
-            if(peer.getPredecessorID() == 0){ //P2P Network in initial state
+            if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
                 
                 if((f =(FileReference) peer.getReferencedFiles().get(fileID))==null){
                         System.err.println("Error! File Not Found!");
@@ -567,8 +567,8 @@ public class PeerProtocol implements Messages{
                 }
             }
             else{//P2P Network in populated state
-                if((fileID > peer.getID() && fileID <= peer.getSuccessorID()) //amazing Lyle
-                    || (peer.getID() > peer.getSuccessorID() && (fileID > peer.getID() || fileID < peer.getSuccessorID()))){
+                if((fileID > peer.getID() && fileID <= peer.getReference().getSuccessorID()) //amazing Lyle
+                    || (peer.getID() > peer.getReference().getSuccessorID() && (fileID > peer.getID() || fileID < peer.getReference().getSuccessorID()))){
             
                     f =(FileReference) peer.getReferencedFiles().get(fileID); ///////////////////////////////////////////////////////
                     //////add here if file exists
@@ -596,7 +596,7 @@ public class PeerProtocol implements Messages{
                         +REGEX+requestID            //request ID
                         +REGEX+requestPORT
                         +REGEX+fileID,              //file ID
-                        InetAddress.getLocalHost(), peer.getSuccessorPort()); //send to successor
+                        InetAddress.getLocalHost(), peer.getReference().getSuccessorPort()); //send to successor
 
                 } 
             }
@@ -659,10 +659,10 @@ public class PeerProtocol implements Messages{
     private static void printStatus(PeerConnection peer) {
         
         System.out.println();
-        System.out.println("Your successor: "+      peer.getSuccessorID()+" "
-                        + "Your successor port: "+  peer.getSuccessorPort()+"\n"
-                        + "Your predecessor: "+     peer.getPredecessorID()+" "
-                        + "Your predecessor port: "+peer.getPredecessorPort());
+        System.out.println("Your successor: "+      peer.getReference().getSuccessorID()+" "
+                        + "Your successor port: "+  peer.getReference().getSuccessorPort()+"\n"
+                        + "Your predecessor: "+     peer.getReference().getPredecessorID()+" "
+                        + "Your predecessor port: "+peer.getReference().getPredecessorPort());
         
     }
 

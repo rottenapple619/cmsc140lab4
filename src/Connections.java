@@ -70,7 +70,7 @@ public class Connections {
         try {
             pConnect = new PeerConnection();
             pConnect.startConnection(true);
-            peerConnectionList.put(pConnect.getInitiatorID(),pConnect);
+            peerConnectionList.put(pConnect.getReference().getInitiatorID(),pConnect);
             isServer = true;
         } catch (SocketException ex) {
             Logger.getLogger(Connections.class.getName()).log(Level.SEVERE, null, ex);
@@ -80,7 +80,7 @@ public class Connections {
         try {
             pConnect = new PeerConnection(id,port);
             pConnect.startConnection(false);
-            peerConnectionList.put(pConnect.getInitiatorID(),pConnect);
+            peerConnectionList.put(pConnect.getReference().getInitiatorID(),pConnect);
         } catch (SocketException ex) {
             Logger.getLogger(Connections.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -88,7 +88,7 @@ public class Connections {
     
     private static int getRandomID() {
         //return (int)(Math.random()*Integer.MAX_VALUE);
-        return (int)(Math.random()*1000)+1;
+        return (int)(Math.random()*1024);
     }
 
     

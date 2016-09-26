@@ -38,8 +38,8 @@ public class NodeReference {
     }
     
     //getters and setters
-    public String getInitiatorID(){
-        return getReference(INIT_ID);
+    public int getInitiatorID(){
+        return Integer.parseInt(getReference(INIT_ID));
     }
     
     public int getInitiatorPort(){
@@ -50,8 +50,8 @@ public class NodeReference {
         return getReference(INIT_ADD);
     }
     
-    public String getPredecessorID(){
-        return getReference(PRED_ID);
+    public int getPredecessorID(){
+        return Integer.parseInt(getReference(PRED_ID));
     }
     
     public String getPredecessorAddress(){
@@ -62,8 +62,8 @@ public class NodeReference {
         return Integer.parseInt(getReference(PRED_PORT));
     }
     
-    public String getSuccessorID(){
-        return getReference(SUC_ID);
+    public int getSuccessorID(){
+        return Integer.parseInt(getReference(SUC_ID));
     }
     
     public int getSuccessorPort(){
@@ -72,6 +72,18 @@ public class NodeReference {
     
     public String getSuccessorAddress(){
         return getReference(SUC_ADD);
+    }
+    
+    public void updateInitID(String ID){
+        updateReference(INIT_ID, ID);
+    }
+    
+    public void updateInitPort(String port){
+        updateReference(INIT_PORT, port);
+    }
+
+    public void updateInitAddress(String address){
+        updateReference(INIT_ADD, address);
     }
     
     public void updatePredID(String ID){

@@ -26,8 +26,8 @@ public class PeerConnection extends Node{
     PeerConnection(int id, int port) throws SocketException {
         super(false);
         System.out.println("Your ID: "+getID()+" Your Port: "+getPort());
-        this.setInitiatorID(id);
-        this.setInitiatorPort(port);
+        this.getReference().updateInitID(id+"");
+        this.getReference().updateInitPort(port+"");
         this.socket = new DatagramSocket(this.getPort());
         
       
@@ -37,8 +37,8 @@ public class PeerConnection extends Node{
     
     PeerConnection() throws SocketException{
         super(true);
-        this.setInitiatorID(getID());
-        this.setInitiatorPort(getPort());
+        this.getReference().updateInitID(getID()+"");
+        this.getReference().updateInitPort(getPort()+"");
         this.notifier = new PeerNotifier(this);
         this.socket = new DatagramSocket(this.getPort());
         
@@ -83,6 +83,8 @@ public class PeerConnection extends Node{
         
         objSender.startSending();
     }
+
+    
 
     
 }

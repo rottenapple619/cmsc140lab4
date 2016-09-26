@@ -21,14 +21,17 @@ class Node{
     private ObjSender objSender;
     private ObjReceiver ojbReceiver;
         
-    private int successorID;
-    private int successorPort;
+    private final NodeReference reference;
     
-    private int predecessorID;
-    private int predecessorPort;
-
-    private int initiatorID;
-    private int initiatorPort;
+    
+//    private int successorID;
+//    private int successorPort;
+//    
+//    private int predecessorID;
+//    private int predecessorPort;
+//
+//    private int initiatorID;
+//    private int initiatorPort;
     
     private final int port;
     
@@ -42,13 +45,20 @@ class Node{
         this.isServer = isServer;
         this.port = AvailablePort.getAvailablePort();
         
-        this.predecessorID = 0;
-        this.predecessorPort = 0;
+        this.reference = new NodeReference();
+        
+        this.reference.updatePredID(0+"");
+        this.reference.updatePredPort(0+"");
+        
         if(isServer){
-            this.successorID = getID();
-            this.successorPort = port;
+            this.reference.updateSucID(getID()+"");
+            this.reference.updateSucPort(port+"");
             
         }
+    }
+    
+    NodeReference getReference(){
+        return this.reference;
     }
     
     HashMap getReferencedFiles(){
@@ -70,61 +80,61 @@ class Node{
             return Connections.getConnection().getID();
     }
     
-    int getPredecessorID(){
-        return predecessorID;
-    }
-    
-    int getPredecessorPort(){
-        return predecessorPort;
-    }
-    
-    int getSuccessorID(){
-        return successorID;
-    }
-    
-    int getSuccessorPort(){
-        return successorPort;
-    }
-
-    int getInitiatorID(){
-        return initiatorID;
-    }
-    
-    int getInitiatorPort(){
-        return initiatorPort;
-    }
+//    int getPredecessorID(){
+//        return predecessorID;
+//    }
+//    
+//    int getPredecessorPort(){
+//        return predecessorPort;
+//    }
+//    
+//    int getSuccessorID(){
+//        return successorID;
+//    }
+//    
+//    int getSuccessorPort(){
+//        return successorPort;
+//    }
+//
+//    int getInitiatorID(){
+//        return initiatorID;
+//    }
+//    
+//    int getInitiatorPort(){
+//        return initiatorPort;
+//    }
     
     boolean isServer(){
         return isServer;
     }
-    void setPID(int id){
-        predecessorID = id;
-    }
-    
-    void setSID(int id){
-        successorID = id;
-    }
-    
-    void setPredecessorPort(int port){
-        predecessorPort = port;
-    }
-    
-    void setSuccessorPort(int port){
-        successorPort = port;
-    }
-    
-    void setInitiatorID(int id){
-        initiatorID = id;
-    }
-    
-    void setInitiatorPort(int port){
-        initiatorPort = port;
-    }
+//    void setPID(int id){
+//        predecessorID = id;
+//    }
+//    
+//    void setSID(int id){
+//        successorID = id;
+//    }
+//    
+//    void setPredecessorPort(int port){
+//        predecessorPort = port;
+//    }
+//    
+//    void setSuccessorPort(int port){
+//        successorPort = port;
+//    }
+//    
+//    void setInitiatorID(int id){
+//        initiatorID = id;
+//    }
+//    
+//    void setInitiatorPort(int port){
+//        initiatorPort = port;
+//    }
     
     void addToReferencedFiles(FileReference fileReference) {
         this.referencedFiles.put(fileReference.getID(), fileReference);
         System.out.println();
-        System.out.print("A new file has been REGISTERED to you for the P2P Network: " +this.initiatorID +"@"+ this.initiatorPort +"\n"+
+        System.out.print("A new file has been REGISTERED to you for the P2P Network: " +this.reference.getInitiatorID() +"@"+ this.reference.getInitiatorPort() +"\n"+
             "FileID: "+fileReference.getID()+ "\n"+
             "FileName: "+fileReference.getFileName()+ "\n"+
             "Published by: "+fileReference.getPublisherID()+"@"+fileReference.getPublisherPort());
@@ -141,7 +151,7 @@ class Node{
             r = this.referencedFiles.get(fileID);
             this.referencedFiles.remove(fileID);
             System.out.println();
-            System.out.print("A file has been UNREGISTERED to you for the P2P Network: " +this.initiatorID +"@"+ this.initiatorPort +"\n"+
+            System.out.print("A file has been UNREGISTERED to you for the P2P Network: " +this.reference.getInitiatorID() +"@"+ this.reference.getInitiatorPort() +"\n"+
                 "FileID: "+r.getID()+ "\n"+
                 "FileName: "+r.getFileName()+ "\n"+
                 "Published by: "+r.getPublisherID()+"@"+r.getPublisherPort());
@@ -159,7 +169,7 @@ class Node{
             r = this.filesNetwork.get(fileID);
             this.filesNetwork.remove(fileID);
             System.out.println();
-            System.out.print("A file has been DELETED to you for the P2P Network: " +this.initiatorID +"@"+ this.initiatorPort +"\n"+
+            System.out.print("A file has been DELETED to you for the P2P Network: " +this.reference.getInitiatorID() +"@"+ this.reference.getInitiatorPort() +"\n"+
                 "FileID: "+r.getID()+ "\n"+
                 "FileName: "+r.getFileName()+ "\n"+
                 "Published by: "+this.getID()+"@"+this.getPort());

@@ -71,8 +71,8 @@ public class MulticastProtocol {
                 PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(Connections.getConnection().getID());
                 System.out.println("Created a new network with ID: "+peer.getID()+"@"+peer.getPort());
                 System.out.println("Initially setting parameters:");
-                System.out.println("Predecessor: "+peer.getPredecessorID());
-                System.out.println("Successor: "+peer.getSuccessorID());
+                System.out.println("Predecessor: "+peer.getReference().getPredecessorID());
+                System.out.println("Successor: "+peer.getReference().getSuccessorID());
             }
         }
         /*********************** J   O   I   N ************************/

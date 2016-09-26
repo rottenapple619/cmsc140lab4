@@ -47,8 +47,8 @@ class ObjSender extends Thread{
             sSocket = new ServerSocket(objPORT);
             node.getOutgoing().send(Messages.INIT_RECEIVE
                     /*+Messages.REGEX+this.transferType*/
-                    +Messages.REGEX+node.getInitiatorID()
-                    +Messages.REGEX+node.getInitiatorPort()
+                    +Messages.REGEX+node.getReference().getInitiatorID()
+                    +Messages.REGEX+node.getReference().getInitiatorPort()
                     +Messages.REGEX+node.getID()
                     +Messages.REGEX+node.getPort()
                     +Messages.REGEX+objPORT
