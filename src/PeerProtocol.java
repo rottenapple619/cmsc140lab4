@@ -120,10 +120,10 @@ public class PeerProtocol implements Messages{
                     Entry thisEntry = (Entry) entries.next();
                     int key = (int) thisEntry.getKey();
                     FileReference file = (FileReference) thisEntry.getValue();
-
-                    if((joinID>peer.getID()&&((file.getID()<peer.getID())||(file.getID()>joinID)))
-                            ||((joinID<peer.getID())&&(file.getID()>joinID))){//check if there is a registered file that will change custody
                         
+                    if(((peer.getID()<joinID) && ((joinID < file.getID()) || (file.getID()<peer.getID())))//check if there is a registered 
+                        || ((peer.getID()>joinID) && (file.getID()<peer.getID() && file.getID()>joinID))){//file that will change custody 
+                 
                         peer.getOutgoing().send(TRANS_REG
                             +REGEX+netID                         //network id
                             +REGEX+netPORT
@@ -160,8 +160,8 @@ public class PeerProtocol implements Messages{
                         int key = (int) thisEntry.getKey();
                         FileReference file = (FileReference) thisEntry.getValue();
 
-                        if((joinID>peer.getID()&&((file.getID()<peer.getID())||(file.getID()>joinID)))
-                                ||((joinID<peer.getID())&&(file.getID()>joinID))){//check if there is a registered file that will change custody
+                        if(((peer.getID()<joinID) && ((joinID < file.getID()) || (file.getID()<peer.getID())))//check if there is a registered 
+                            || ((peer.getID()>joinID) && (file.getID()<peer.getID() && file.getID()>joinID))){//file that will change custody 
 
                             peer.getOutgoing().send(TRANS_REG
                                 +REGEX+netID                         //network id
