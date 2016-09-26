@@ -6,6 +6,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,17 +30,17 @@ public class Connections {
     private PeerConnection pConnect;
     private static Connections connect = null;
     private static MulticastConnection mcConnect = null;
-    private static ArrayList<Initiator> initiatorList;
-    private static ArrayList<PeerConnection> peerConnectionList;
-    private static HashMap<Integer,FileObj> filesLocal;
-    private static HashMap<Integer,Integer> cacheOfNetworkFiles;
+    private static Map<Integer, PeerReference> initiatorList;
+    private static Map<Integer, PeerConnection> peerConnectionList;
+    private static Map<Integer,FileObj> filesLocal;
+    private static Map<Integer,Integer> cacheOfNetworkFiles;
     
     Connections(){
         ID = getRandomID();
-        initiatorList = new ArrayList<>();
-        peerConnectionList = new ArrayList<>();
-        filesLocal = new HashMap<>();
-        cacheOfNetworkFiles = new HashMap<>();
+        initiatorList = new ConcurrentHashMap<>();
+        peerConnectionList = new ConcurrentHashMap<>();
+        filesLocal = new ConcurrentHashMap<>();
+        cacheOfNetworkFiles = new ConcurrentHashMap<>();
         
         try {
             addressID = InetAddress.getLocalHost().getHostAddress(); //this should be the one being used as ID
@@ -68,7 +70,7 @@ public class Connections {
         try {
             pConnect = new PeerConnection();
             pConnect.startConnection(true);
-            peerConnectionList.add(pConnect);
+            peerConnectionList.put(pConnect.getInitiatorID(),pConnect);
             isServer = true;
         } catch (SocketException ex) {
             Logger.getLogger(Connections.class.getName()).log(Level.SEVERE, null, ex);
@@ -78,7 +80,7 @@ public class Connections {
         try {
             pConnect = new PeerConnection(id,port);
             pConnect.startConnection(false);
-            peerConnectionList.add(pConnect);
+            peerConnectionList.put(pConnect.getInitiatorID(),pConnect);
         } catch (SocketException ex) {
             Logger.getLogger(Connections.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -92,19 +94,19 @@ public class Connections {
     
 
     
-    ArrayList<Initiator> getInitiatorList() {
+    Map<Integer, PeerReference> getInitiatorList() {
         return initiatorList;
     }
 
-    boolean contains(int id) {
-        Iterator<Initiator> it = initiatorList.iterator();
-        while(it.hasNext()){
-            Initiator i = it.next();
-            if(i.getID()==id)
-                return true;
-        }
-        return false;
-    }
+//    boolean contains(int id) {
+//        Iterator<Initiator> it = initiatorList.iterator();
+//        while(it.hasNext()){
+//            Initiator i = it.next();
+//            if(i.getID()==id)
+//                return true;
+//        }
+//        return false;
+//    }
     
     int getID(){
         return this.ID;
@@ -121,24 +123,24 @@ public class Connections {
         return mcConnect;
     }
     
-    PeerConnection getPeerConnection(int initiatorID/*String initiatorID*/){
-        for(PeerConnection peer:peerConnectionList){
-            if(peer.getInitiatorID() == initiatorID){
-                return peer;
-            }
-        }
-        return null;
-    }
+//    PeerConnection getPeerConnection(int initiatorID/*String initiatorID*/){
+//        for(PeerConnection peer:peerConnectionList){
+//            if(peer.getInitiatorID() == initiatorID){
+//                return peer;
+//            }
+//        }
+//        return null;
+//    }
     
-    ArrayList<PeerConnection> getPeerConnection(){
+    Map getPeerConnection(){
         return peerConnectionList;
     }
 
-    HashMap getLocalFiles(){
+    Map getLocalFiles(){
         return filesLocal;
     }
     
-    HashMap getCachedNetworkFiles(){
+    Map getCachedNetworkFiles(){
         return cacheOfNetworkFiles;
     }
     

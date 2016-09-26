@@ -26,7 +26,7 @@ public class MulticastProtocol {
         /*********************** RECEIVED CREATE MSG ************************/
         if(msg[0].equalsIgnoreCase(Command.CREATE.toString())){
             //check if added
-            if(currConnection.contains(Integer.parseInt(msg[1]))
+            if(currConnection.getInitiatorList().containsKey(Integer.parseInt(msg[1]))
                     /*currConnection.getInitiatorList().contains(Integer.parseInt(msg[1]))*/
                     || currConnection.getID() == Integer.parseInt(msg[1])
                     /*|| currConnection.getID().equals(msg[1])*/ ){
@@ -34,7 +34,7 @@ public class MulticastProtocol {
             }
             System.out.println("Received Message: A network by "+msg[1]+"@"+msg[2]+" has been created");
             //currConnection.getInitiatorList().add(Integer.parseInt(msg[1]));
-            currConnection.getInitiatorList().add(new Initiator(Integer.parseInt(msg[1]),Integer.parseInt(msg[2])));
+            currConnection.getInitiatorList().put(Integer.parseInt(msg[1]),new PeerReference(msg[1],msg[2],""));
         }
         
         /*********************** RECEIVED PUBLISH MSG ************************/
@@ -68,7 +68,7 @@ public class MulticastProtocol {
             }
             else{
                 Connections.getConnection().initializePeerConnection();
-                PeerConnection peer = Connections.getConnection().getPeerConnection(Connections.getConnection().getID());
+                PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(Connections.getConnection().getID());
                 System.out.println("Created a new network with ID: "+peer.getID()+"@"+peer.getPort());
                 System.out.println("Initially setting parameters:");
                 System.out.println("Predecessor: "+peer.getPredecessorID());
@@ -96,12 +96,12 @@ public class MulticastProtocol {
                 return;
             }
 
-            if(!Connections.getConnection().contains(initiatorID)){
+            if(!Connections.getConnection().getInitiatorList().containsKey(initiatorID)){
                 System.err.println("Unable to connect to the network ID: "+initiatorID);
                 return;
             }
             
-            if(Connections.getConnection().getPeerConnection(initiatorID)!=null){
+            if(Connections.getConnection().getPeerConnection().get(initiatorID)!=null){
                 System.err.println("Already connected to this network.");
                 return;
             }
@@ -123,7 +123,7 @@ public class MulticastProtocol {
             try{
                 initiatorID = Integer.parseInt(command.substring(8,command.indexOf("@")));
                 initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = Connections.getConnection().getPeerConnection(initiatorID);
+                peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(initiatorID);
             }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
                 System.err.println("Invalid address");
                 return;
@@ -174,7 +174,7 @@ public class MulticastProtocol {
                 fileID = Integer.parseInt(command.substring(command.indexOf(" ")+1,command.lastIndexOf(" ")));
                 initiatorID = Integer.parseInt(command.substring(command.lastIndexOf(" ")+1,command.indexOf("@")));
                 initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = Connections.getConnection().getPeerConnection(initiatorID);
+                peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(initiatorID);
             }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
                 System.err.println("Invalid address");
                 return;
@@ -212,7 +212,7 @@ public class MulticastProtocol {
                 fileID = Integer.parseInt(command.substring(command.indexOf(" ")+1,command.lastIndexOf(" ")));
                 initiatorID = Integer.parseInt(command.substring(command.lastIndexOf(" ")+1,command.indexOf("@")));
                 initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = Connections.getConnection().getPeerConnection(initiatorID);
+                peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(initiatorID);
             }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
                 System.err.println("Invalid address");
                 return;
@@ -246,7 +246,7 @@ public class MulticastProtocol {
 //            try{
 //                initiatorID = Integer.parseInt(command.substring(10,command.indexOf("@")));
 //                initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-//                peer = Connections.getConnection().getPeerConnection(initiatorID);
+//                peer = Connections.getConnection().getPeerConnection.get(initiatorID);
 //            }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
 //                System.err.println("Invalid address");
 //                return;
@@ -299,7 +299,7 @@ public class MulticastProtocol {
             try{
                 initiatorID = Integer.parseInt(command.substring(13,command.indexOf("@")));
                 initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = Connections.getConnection().getPeerConnection(initiatorID);
+                peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(initiatorID);
             }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
                 System.err.println("Invalid address");
                 return;
