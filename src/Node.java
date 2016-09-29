@@ -22,7 +22,7 @@ class Node{
     private ObjReceiver ojbReceiver;
         
     private final NodeReference reference;
-    
+    private final FingerTable fingerTable;
     
 //    private int successorID;
 //    private int successorPort;
@@ -46,6 +46,7 @@ class Node{
         this.port = AvailablePort.getAvailablePort();
         
         this.reference = new NodeReference();
+        this.fingerTable = new FingerTable();
         
         this.reference.updatePredID(0+"");
         this.reference.updatePredPort(0+"");
@@ -55,6 +56,10 @@ class Node{
             this.reference.updateSucPort(port+"");
             
         }
+    }
+    
+    FingerTable getFingerTable(){
+        return this.fingerTable;
     }
     
     NodeReference getReference(){

@@ -88,7 +88,7 @@ public class Connections {
     
     private static int getRandomID() {
         //return (int)(Math.random()*Integer.MAX_VALUE);
-        return (int)(Math.random()*1024);
+        return (int)(Math.random()*Math.pow(2, FingerTable.KEY));
     }
 
     
