@@ -21,7 +21,7 @@ public class MulticastProtocol {
 
     static void check(String incomingMessage) {
         String msg[] = incomingMessage.split(Messages.REGEX);
-        Connections currConnection = Connections.getConnection();
+        Connections currConnection = Connections.getInstance();
         
         /*********************** RECEIVED CREATE MSG ************************/
         if(msg[0].equalsIgnoreCase(Command.CREATE.toString())){
@@ -63,12 +63,12 @@ public class MulticastProtocol {
         /*********************** C  R  E  A  T  E ************************/
         if(command.equalsIgnoreCase(Command.CREATE.toString())){
             
-            if(Connections.getConnection().isServer()){//check if nagcreate na
+            if(Connections.getInstance().isServer()){//check if nagcreate na
                 System.err.println("Only a single instance of INITIATOR can be created.");
             }
             else{
-                Connections.getConnection().initializePeerConnection();
-                PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(Connections.getConnection().getID());
+                Connections.getInstance().initializePeerConnection();
+                PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(Connections.getInstance().getID());
                 System.out.println("Created a new network with ID: "+peer.getID()+"@"+peer.getPort());
                 System.out.println("Initially setting parameters:");
                 System.out.println("Predecessor: "+peer.getReference().getPredecessorID());
@@ -96,18 +96,18 @@ public class MulticastProtocol {
                 return;
             }
 
-            if(!Connections.getConnection().getInitiatorList().containsKey(initiatorID)){
+            if(!Connections.getInstance().getInitiatorList().containsKey(initiatorID)){
                 System.err.println("Unable to connect to the network ID: "+initiatorID);
                 return;
             }
             
-            if(Connections.getConnection().getPeerConnection().get(initiatorID)!=null){
+            if(Connections.getInstance().getPeerConnection().get(initiatorID)!=null){
                 System.err.println("Already connected to this network.");
                 return;
             }
             
             
-            Connections.getConnection().initializePeerConnection(initiatorID,initiatorPort);
+            Connections.getInstance().initializePeerConnection(initiatorID,initiatorPort);
         }
         /*********************** P U B L I S H ************************/
         else if(command.startsWith("PUBLISH")||command.startsWith("publish")){
@@ -115,7 +115,7 @@ public class MulticastProtocol {
             int initiatorPort;
             PeerConnection peer;
 
-            if(Connections.getConnection().getPeerConnection().isEmpty()){
+            if(Connections.getInstance().getPeerConnection().isEmpty()){
                 System.err.println("Not connected to any P2P Network");
                 return;
             }
@@ -123,7 +123,7 @@ public class MulticastProtocol {
             try{
                 initiatorID = Integer.parseInt(command.substring(8,command.indexOf("@")));
                 initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(initiatorID);
+                peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(initiatorID);
             }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
                 System.err.println("Invalid address");
                 return;
@@ -174,7 +174,7 @@ public class MulticastProtocol {
                 fileID = Integer.parseInt(command.substring(command.indexOf(" ")+1,command.lastIndexOf(" ")));
                 initiatorID = Integer.parseInt(command.substring(command.lastIndexOf(" ")+1,command.indexOf("@")));
                 initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(initiatorID);
+                peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(initiatorID);
             }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
                 System.err.println("Invalid address");
                 return;
@@ -212,7 +212,7 @@ public class MulticastProtocol {
                 fileID = Integer.parseInt(command.substring(command.indexOf(" ")+1,command.lastIndexOf(" ")));
                 initiatorID = Integer.parseInt(command.substring(command.lastIndexOf(" ")+1,command.indexOf("@")));
                 initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(initiatorID);
+                peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(initiatorID);
             }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
                 System.err.println("Invalid address");
                 return;
@@ -246,7 +246,7 @@ public class MulticastProtocol {
 //            try{
 //                initiatorID = Integer.parseInt(command.substring(10,command.indexOf("@")));
 //                initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-//                peer = Connections.getConnection().getPeerConnection.get(initiatorID);
+//                peer = Connections.getInstance().getPeerConnection.get(initiatorID);
 //            }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
 //                System.err.println("Invalid address");
 //                return;
@@ -273,13 +273,13 @@ public class MulticastProtocol {
         
         /*********************** F I L E S L O C A L ************************/
         else if(command.equalsIgnoreCase(Command.FILESLOCAL.toString())){
-          if(Connections.getConnection().getLocalFiles().isEmpty()){
+          if(Connections.getInstance().getLocalFiles().isEmpty()){
                 System.out.println("Files empty..");
             }
             else{
                 System.out.println();
                 System.out.println("Local Files: ");
-                Iterator entries = Connections.getConnection().getLocalFiles().entrySet().iterator();
+                Iterator entries = Connections.getInstance().getLocalFiles().entrySet().iterator();
                 
                 while (entries.hasNext()) {
                     Entry thisEntry = (Entry) entries.next();
@@ -299,7 +299,7 @@ public class MulticastProtocol {
             try{
                 initiatorID = Integer.parseInt(command.substring(13,command.indexOf("@")));
                 initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(initiatorID);
+                peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(initiatorID);
             }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
                 System.err.println("Invalid address");
                 return;
@@ -311,7 +311,7 @@ public class MulticastProtocol {
             }
             
             
-            Connections.getConnection().getCachedNetworkFiles().clear();
+            Connections.getInstance().getCachedNetworkFiles().clear();
             System.out.println();
             System.out.println("FILES IN THE P2P NETWORK: "+initiatorID+"@"+initiatorPort);
             peer.getOutgoing().send(Messages.FILESNETWORK

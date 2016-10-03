@@ -3,9 +3,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -50,7 +47,7 @@ public class Connections {
         System.out.println("Your ID: "+ID);
     }
 
-    static Connections getConnection(){
+    static Connections getInstance(){
         if(connect == null){
             connect = new Connections();
         }
@@ -92,28 +89,17 @@ public class Connections {
     }
 
     
-
-    
     Map<Integer, PeerReference> getInitiatorList() {
         return initiatorList;
     }
-
-//    boolean contains(int id) {
-//        Iterator<Initiator> it = initiatorList.iterator();
-//        while(it.hasNext()){
-//            Initiator i = it.next();
-//            if(i.getID()==id)
-//                return true;
-//        }
-//        return false;
-//    }
     
     int getID(){
         return this.ID;
     }
-    /*String getID() {
+    
+    String getAddress() {
         return this.addressID;
-    }*/
+    }
     
     boolean isServer() {
        return this.isServer;
@@ -123,24 +109,15 @@ public class Connections {
         return mcConnect;
     }
     
-//    PeerConnection getPeerConnection(int initiatorID/*String initiatorID*/){
-//        for(PeerConnection peer:peerConnectionList){
-//            if(peer.getInitiatorID() == initiatorID){
-//                return peer;
-//            }
-//        }
-//        return null;
-//    }
-    
-    Map getPeerConnection(){
+    Map<Integer, PeerConnection> getPeerConnection(){
         return peerConnectionList;
     }
 
-    Map getLocalFiles(){
+    Map<Integer, FileObj> getLocalFiles(){
         return filesLocal;
     }
     
-    Map getCachedNetworkFiles(){
+    Map<Integer, Integer> getCachedNetworkFiles(){
         return cacheOfNetworkFiles;
     }
     

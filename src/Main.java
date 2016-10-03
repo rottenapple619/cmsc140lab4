@@ -11,7 +11,8 @@
 public class Main {
  
     public static void main(String args[]){
-        Connections.getConnection().initiateMulticastConnection();
+        Connections.getInstance().initiateMulticastConnection();
+        CommandListener.getInstance().start();
     }
     
 }

@@ -40,7 +40,6 @@ public class MulticastConnection {
     void startConnection() {
         System.out.println("Connected to the MULTICAST ADDRESS: "+MULTICAST_ADDRESS);
         incoming.start();
-        outgoing.start();
         System.out.println("Listening for new connections at PORT: "+MULTICAST_PORT);
         System.out.println("Type 'COMMAND' for a list of available commands.");
     }

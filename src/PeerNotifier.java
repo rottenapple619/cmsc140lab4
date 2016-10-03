@@ -28,7 +28,7 @@ public class PeerNotifier extends Thread{
         while(isRunning){
             try {
                 Thread.sleep(delay);
-                Connections.getConnection().getMulticastConnection().getOutgoing().send(Command.CREATE.toString()
+                Connections.getInstance().getMulticastConnection().getOutgoing().send(Command.CREATE.toString()
                         +Messages.REGEX+node.getID()/*initiator.getID()*/
                         +Messages.REGEX+node.getPort()/*initiator.getPort()*/);
             } catch (InterruptedException ex) {

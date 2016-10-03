@@ -82,7 +82,7 @@ class Node{
         /*if(isServer) //remove this
             return 9999;
         else*/
-            return Connections.getConnection().getID();
+            return Connections.getInstance().getID();
     }
     
 //    int getPredecessorID(){

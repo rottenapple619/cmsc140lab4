@@ -38,7 +38,7 @@ public class PeerProtocol implements Messages{
             int successorID = Integer.parseInt(msg[5]);
             int successorPORT = Integer.parseInt(msg[6]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             peer.getReference().updatePredID(predecessorID+"");
             peer.getReference().updatePredPort(predecessorPORT+"");
             peer.getReference().updateSucID(successorID+"");
@@ -70,7 +70,7 @@ public class PeerProtocol implements Messages{
             int predecessorID = Integer.parseInt(msg[3]);
             int predecessorPORT = Integer.parseInt(msg[4]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             peer.getReference().updatePredID(predecessorID+"");
             peer.getReference().updatePredPort(predecessorPORT+"");
             
@@ -89,7 +89,7 @@ public class PeerProtocol implements Messages{
             int fileID = Integer.parseInt(msg[5]);
             String fileName = msg[6];
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
             peer.addToReferencedFiles(new FileReference(fileID,fileName,publisherID,publisherPORT));
         }
@@ -106,7 +106,7 @@ public class PeerProtocol implements Messages{
             
             
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
 
             if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
                 peer.getReference().updatePredID(joinID+"");
@@ -250,12 +250,12 @@ public class PeerProtocol implements Messages{
             int fileID = Integer.parseInt(msg[5]);
             String fileName = msg[6];
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
             if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
                 peer.addToReferencedFiles(new FileReference(fileID,fileName,publisherID,publisherPORT));
                 
-                Connections.getConnection().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
+                Connections.getInstance().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
                     +Messages.REGEX+peer.getID()                                                        //published
                     +Messages.REGEX+peer.getPort()
                     +Messages.REGEX+peer.getReference().getInitiatorID()
@@ -281,7 +281,7 @@ public class PeerProtocol implements Messages{
                             InetAddress.getLocalHost(), publisherPORT); //send to the publisher of the file
                     }
                     else{
-                        Connections.getConnection().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
+                        Connections.getInstance().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
                             +Messages.REGEX+peer.getID()                                                        //published
                             +Messages.REGEX+peer.getPort()
                             +Messages.REGEX+peer.getReference().getInitiatorID()
@@ -313,7 +313,7 @@ public class PeerProtocol implements Messages{
             int fileID = Integer.parseInt(msg[5]);
             String fileName = msg[6];
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
             System.out.println();
             System.out.println("A new file has been successfully registered to  "+referencedID+"@"+referencedPORT+"\n"+
@@ -323,7 +323,7 @@ public class PeerProtocol implements Messages{
                 "Published by: "+peer.getID()+"@"+peer.getPort());
             System.out.println();
             
-            Connections.getConnection().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
+            Connections.getInstance().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to multicast that a file has been
                 +Messages.REGEX+referencedID                                                          //published
                 +Messages.REGEX+referencedPORT
                 +Messages.REGEX+peer.getReference().getInitiatorID()
@@ -343,7 +343,7 @@ public class PeerProtocol implements Messages{
             
             int fileID = Integer.parseInt(msg[5]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
             FileReference fr;
             
@@ -435,7 +435,7 @@ public class PeerProtocol implements Messages{
             String fileName = msg[5];
             int fileID = Integer.parseInt(msg[6]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
             peer.deleteNetworkFile(fileID);
             
@@ -458,7 +458,7 @@ public class PeerProtocol implements Messages{
             String fileName = msg[5];
             int fileID = Integer.parseInt(msg[6]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
             System.out.println();
             System.out.println("FILE SUCCESSFULLY DELETED IN THE P2P NETWORK: "+netID+"@"+netPORT
@@ -476,7 +476,7 @@ public class PeerProtocol implements Messages{
             
             int fileID = Integer.parseInt(msg[5]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
             System.out.println();
             System.out.println("FAILED TO DELETE A FILE IN THE P2P NETWORK: "+netID+"@"+netPORT
@@ -493,7 +493,7 @@ public class PeerProtocol implements Messages{
             int senderID  = Integer.parseInt(msg[3]);
             int senderPORT = Integer.parseInt(msg[4]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
             if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
                 
@@ -576,13 +576,13 @@ public class PeerProtocol implements Messages{
             int fileID = Integer.parseInt(msg[5]);
             String fileName = msg[6];
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
-            if(!Connections.getConnection().getCachedNetworkFiles().containsKey(fileID)){
+            if(!Connections.getInstance().getCachedNetworkFiles().containsKey(fileID)){
                 System.out.println("FileID: "+fileID
                                 +" Filename: "+fileName
                                 +" Registered to: "+senderID+"@"+senderPORT);
-                Connections.getConnection().getCachedNetworkFiles().put(fileID, senderID);
+                Connections.getInstance().getCachedNetworkFiles().put(fileID, senderID);
             }
         }
         else if(msg[0].equalsIgnoreCase(Messages.RETRIEVE)){
@@ -594,7 +594,7 @@ public class PeerProtocol implements Messages{
             
             int fileID = Integer.parseInt(msg[5]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             FileReference f;
             
             if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
@@ -610,7 +610,7 @@ public class PeerProtocol implements Messages{
                             +"\nRegistered to: "+peer.getID()+"@"+peer.getPort()+"(You)");
                     System.out.println();
                     FileObj file = (FileObj) peer.getFilesInNetwork().get(fileID);
-                    Connections.getConnection().getLocalFiles().put(fileID, file);
+                    Connections.getInstance().getLocalFiles().put(fileID, file);
                     System.out.println("'"+file.getFileName()+"' has been retrieved and saved to local files.");
                 }
             }
@@ -658,7 +658,7 @@ public class PeerProtocol implements Messages{
             
             int fileID = Integer.parseInt(msg[5]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             peer.openObjSender(RETRIEVE, requestID, requestPORT, fileID);
         }
         else if(msg[0].equalsIgnoreCase(INIT_RECEIVE)){
@@ -671,7 +671,7 @@ public class PeerProtocol implements Messages{
             int objPORT = Integer.parseInt(msg[5]);
             //int fileID = Integer.parseInt(msg[5]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             peer.openObjReceiver(RETRIEVE,senderID,senderPORT,objPORT); 
         }
         else if(msg[0].equalsIgnoreCase(INIT_COPY)){
@@ -680,11 +680,11 @@ public class PeerProtocol implements Messages{
             
             int fileID = Integer.parseInt(msg[3]);
             
-            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             System.out.println("RECEIVED A INIT_RECEIVE");
             
             FileObj file = (FileObj) peer.getFilesInNetwork().get(fileID);
-            Connections.getConnection().getLocalFiles().put(fileID, file);
+            Connections.getInstance().getLocalFiles().put(fileID, file);
             System.out.println("'"+file.getFileName()+"' has been retrieved and saved to local files.");
         }
         //        else if(msg[0].equalsIgnoreCase(READYTOPUBLISH)){
@@ -698,7 +698,7 @@ public class PeerProtocol implements Messages{
 //            int objPORT = Integer.parseInt(msg[6]);
 //            //int fileID = Integer.parseInt(msg[7]);
 //            
-//            PeerConnection peer = (PeerConnection) Connections.getConnection().getPeerConnection().get(netID);
+//            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
 //            peer.openObjReceiver(transferType,senderID,senderPORT,objPORT); 
 //        }
        

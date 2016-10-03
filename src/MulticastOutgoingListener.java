@@ -18,46 +18,24 @@ import java.util.logging.Logger;
  *
  * @author Marz
  */
-class MulticastOutgoingListener extends Thread{
+class MulticastOutgoingListener {
     private final MulticastSocket mcSocket;
-    private boolean isRunning = false;
     
     private byte[] sendData;
     private DatagramPacket sendPacket;
-    private final BufferedReader stdIn;
     
     public MulticastOutgoingListener(MulticastSocket mcSocket) {
-        isRunning = true;
-        this.mcSocket = mcSocket;
-        this.stdIn = new BufferedReader(new InputStreamReader(System.in));
+        this.mcSocket = mcSocket;        
     }
     
-    @Override
-        public void run(){
-            try{
-                while(isRunning){
-                    MulticastProtocol.command(stdIn.readLine());
-                }
-            }catch(IOException ex){
-            }finally{
-                if(stdIn!=null){
-                    try {
-                        stdIn.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(MulticastConnection.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
+    void send(String msg) {
+        try {
+            sendData = new byte[1024];
+            sendData = msg.getBytes();
+            sendPacket = new DatagramPacket(sendData,sendData.length,
+                    InetAddress.getByName(MulticastConnection.MULTICAST_ADDRESS),MulticastConnection.MULTICAST_PORT);
+            mcSocket.send(sendPacket);
+        } catch (IOException ex) {
         }
-
-        void send(String msg) {
-            try {
-                sendData = new byte[1024];
-                sendData = msg.getBytes();
-                sendPacket = new DatagramPacket(sendData,sendData.length,
-                        InetAddress.getByName(MulticastConnection.MULTICAST_ADDRESS),MulticastConnection.MULTICAST_PORT);
-                mcSocket.send(sendPacket);
-            } catch (IOException ex) {
-            }
-        }
+    }
 }
