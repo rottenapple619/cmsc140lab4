@@ -46,7 +46,7 @@ class FileReference {
         return this.publisher;
     }
     
-    public PeerReference getIniator(){
+    public PeerReference getInitiator(){
         return this.initiator;
     }
 }

@@ -119,7 +119,7 @@ public class CommandListener extends Thread{
             Map<Integer, FileReference> publishedFiles = 
                 conInstance.getPublishedFiles().entrySet()
                 .stream()
-                .filter(file -> file.getValue().getIniator().getID() == initiatorID)
+                .filter(file -> file.getValue().getInitiator().getID() == initiatorID)
                 .collect(Collectors.toMap(file -> file.getKey(), file -> file.getValue()));
             
             if(publishedFiles.isEmpty()){
