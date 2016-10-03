@@ -11,15 +11,15 @@
 class FileReference {
 
     private final int ID;
-    private final int publisherID;
-    private final int publisherPort;
     private final String fileName;
+    private final PeerReference publisher;
+    private final PeerReference initiator;
     
-    FileReference(int ID, String fileName, int pubID, int pubPort){
-        this.ID = ID;
+    FileReference(int fileID, String fileName, PeerReference peerReference, PeerReference initiator) {
+        this.ID = fileID;
         this.fileName = fileName;
-        this.publisherID = pubID;
-        this.publisherPort = pubPort;
+        this.publisher = peerReference;
+        this.initiator = initiator;
     }
     
     public int getID(){
@@ -31,10 +31,22 @@ class FileReference {
     }
     
     public int getPublisherID(){
-        return this.publisherID;
+        return this.publisher.getID();
     }
     
     public int getPublisherPort(){
-        return this.publisherPort;
+        return this.publisher.getPort();
+    }
+    
+    public String getPublisherAddress(){
+        return this.publisher.getAddress();
+    }
+    
+    public PeerReference getPublisher(){
+        return this.publisher;
+    }
+    
+    public PeerReference getIniator(){
+        return this.initiator;
     }
 }

@@ -35,18 +35,32 @@ public class MulticastProtocol {
         
         /*********************** RECEIVED PUBLISH MSG ************************/
         if(msg[0].equalsIgnoreCase(Messages.PUBLISH)){
-            int referencedID = Integer.parseInt(msg[1]);            
-            int referencedPORT = Integer.parseInt(msg[2]);            
-            int netID = Integer.parseInt(msg[3]);
-            int netPORT = Integer.parseInt(msg[4]);
-            String fileName = msg[5];
-            int fileID = Integer.parseInt(msg[6]);
+            
+            int netID = Integer.parseInt(msg[1]);//P2P initiator
+            int netPORT = Integer.parseInt(msg[2]);
+            String netADD = msg[3];
+            
+            int publisherID = Integer.parseInt(msg[4]);//file publisher
+            int publisherPORT = Integer.parseInt(msg[5]);
+            String publisherADD = msg[6];
+            
+            String fileName = msg[7];
+            int fileID = Integer.parseInt(msg[8]);
+            
+            if(Connections.getInstance().getPublishedFiles().containsKey(fileID)){
+                return;
+            }
+            
+            Connections.getInstance().getPublishedFiles().put(fileID, 
+                    new FileReference(fileID,fileName,
+                    new PeerReference(publisherID+"",publisherPORT+"",publisherADD),
+                    Connections.getInstance().getInitiatorList().get(netID)));
             
             System.out.println();
             System.out.println("FILE PUBLISHED TO THE P2P NETWORK: "+netID+"@"+netPORT
                     +"\nFileID: "+fileID
                     +"\nFilename: '"+fileName+"'"
-                    +"\nRegistered to: "+referencedID+"@"+referencedPORT);
+                    +"\nPublished by: "+publisherID+"@"+publisherPORT);
             System.out.println();
         }
     }
@@ -56,63 +70,9 @@ public class MulticastProtocol {
     
     static void command(String command) throws FileNotFoundException, IOException{
                 
-        /*********************** P U B L I S H ************************/
-        if(command.startsWith("PUBLISH")||command.startsWith("publish")){
-            int initiatorID;
-            int initiatorPort;
-            PeerConnection peer;
 
-            if(Connections.getInstance().getPeerConnection().isEmpty()){
-                System.err.println("Not connected to any P2P Network");
-                return;
-            }
-            
-            try{
-                initiatorID = Integer.parseInt(command.substring(8,command.indexOf("@")));
-                initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(initiatorID);
-            }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
-                System.err.println("Invalid address");
-                return;
-            }
-            
-            if(peer==null){
-                System.err.println("Not connected to "+initiatorID+"@"+initiatorPort);
-                return;
-            }
-            
-            JFileChooser fc = new JFileChooser();
-            File file;
-            FileObj fileObj;
-            int actionTaken = fc.showOpenDialog(null);
-            if(actionTaken == JFileChooser.APPROVE_OPTION){
-                file = fc.getSelectedFile();
-                fileObj = new FileObj(file,initiatorID);
-                peer.getFilesInNetwork().put(fileObj.getID(), fileObj);
-            }
-            else{
-                System.err.println("Publication aborted.");
-                return;
-            }
-            
-            System.out.println();
-            System.out.println("PUBLISHING A FILE TO THE P2P NETWORK: "+initiatorID+"@"+initiatorPort
-                    +"\nFileID: "+fileObj.getID()
-                    +"\nFilename : '"+fileObj.getFileName()+"'");
-            System.out.println();
-            
-            peer.getOutgoing().send(Messages.PUBLISH
-                +Messages.REGEX+initiatorID         //network ID
-                +Messages.REGEX+initiatorPort
-                +Messages.REGEX+peer.getID()        //publisher ID
-                +Messages.REGEX+peer.getPort()
-                +Messages.REGEX+fileObj.getID()     //file ID
-                +Messages.REGEX+fileObj.getFileName(),  //file Name  
-                InetAddress.getLocalHost(), initiatorPort);
-            
-        }
         /*********************** R  E  T  R  I  E  V  E ************************/
-        else if(command.startsWith("RETRIEVE")||command.startsWith("retrieve")){
+        if(command.startsWith("RETRIEVE")||command.startsWith("retrieve")){
             int fileID;
             int initiatorID;
             int initiatorPort;
@@ -258,7 +218,7 @@ public class MulticastProtocol {
             }
             
             
-            Connections.getInstance().getCachedNetworkFiles().clear();
+//            Connections.getInstance().getCachedNetworkFiles().clear();
             System.out.println();
             System.out.println("FILES IN THE P2P NETWORK: "+initiatorID+"@"+initiatorPort);
             peer.getOutgoing().send(Messages.FILESNETWORK

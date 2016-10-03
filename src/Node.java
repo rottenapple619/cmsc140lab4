@@ -1,5 +1,7 @@
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /*
@@ -15,8 +17,9 @@ import java.util.HashMap;
 class Node{
     public boolean requestForFiles = false;
     
-    private final HashMap<Integer, FileObj> filesNetwork;
-    private final HashMap<Integer, FileReference> referencedFiles;
+    private final Map<Integer, FileObj> filesToPublish;
+    private final Map<Integer, FileReference> referencedFiles;
+    private final Map<Integer, FileObjNotifier> publishedFiles;
     
     private ObjSender objSender;
     private ObjReceiver ojbReceiver;
@@ -25,13 +28,13 @@ class Node{
     private final FingerTable fingerTable;
     
     private final int port;
-    
     private final boolean isServer;
     
     Node(boolean isServer){
 
-        this.referencedFiles = new HashMap<>();
-        this.filesNetwork = new HashMap<>();
+        this.referencedFiles = new ConcurrentHashMap<>();
+        this.filesToPublish = new ConcurrentHashMap<>();
+        this.publishedFiles = new ConcurrentHashMap<>();
         
         this.isServer = isServer;
         this.port = AvailablePort.getAvailablePort();
@@ -58,12 +61,12 @@ class Node{
         return this.reference;
     }
     
-    HashMap getReferencedFiles(){
+    Map<Integer, FileReference> getReferencedFiles(){
         return this.referencedFiles;
     }
     
-    HashMap getFilesInNetwork(){
-        return this.filesNetwork;
+    Map<Integer, FileObj> getFilesToPublish(){
+        return this.filesToPublish;
     }
     
     int getPort(){
@@ -117,21 +120,28 @@ class Node{
         return r;
     }
     
-    FileObj deleteNetworkFile(int fileID){
-        FileObj r = null;
-        if(this.filesNetwork.containsKey(fileID)){
-            r = this.filesNetwork.get(fileID);
-            this.filesNetwork.remove(fileID);
-            System.out.println();
-            System.out.print("A file has been DELETED to you for the P2P Network: " +this.reference.getInitiatorID() +"@"+ this.reference.getInitiatorPort() +"\n"+
-                "FileID: "+r.getID()+ "\n"+
-                "FileName: "+r.getFileName()+ "\n"+
-                "Published by: "+this.getID()+"@"+this.getPort());
-            System.out.print("(You)\n");
-            
-        }
-        return r;
+    void publishFile(int fileID){
+        FileObj fileToPublish = this.filesToPublish.remove(fileID);
+        FileObjNotifier fileNotifier = new FileObjNotifier(this,fileToPublish);
+        fileNotifier.start();
+        this.publishedFiles.put(fileID, fileNotifier);
     }
+    
+//    FileObj deleteNetworkFile(int fileID){
+//        FileObj r = null;
+//        if(this.filesNetwork.containsKey(fileID)){
+//            r = this.filesNetwork.get(fileID);
+//            this.filesNetwork.remove(fileID);
+//            System.out.println();
+//            System.out.print("A file has been DELETED to you for the P2P Network: " +this.reference.getInitiatorID() +"@"+ this.reference.getInitiatorPort() +"\n"+
+//                "FileID: "+r.getID()+ "\n"+
+//                "FileName: "+r.getFileName()+ "\n"+
+//                "Published by: "+this.getID()+"@"+this.getPort());
+//            System.out.print("(You)\n");
+//            
+//        }
+//        return r;
+//    }
 
     
 }

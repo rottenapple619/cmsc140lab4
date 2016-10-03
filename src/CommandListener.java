@@ -1,9 +1,13 @@
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -59,7 +63,7 @@ public class CommandListener extends Thread{
         this.isRunning = false;
     }
 
-    private void parse(String typedString) {
+    private void parse(String typedString) throws UnknownHostException {
         String command[] = typedString.split(Messages.REGEX);
         Connections conInstance = Connections.getInstance();
         
@@ -88,7 +92,9 @@ public class CommandListener extends Thread{
                 System.err.println("Invalid initiatorID: "+command[1]);
                 return;
             }
+            
             PeerReference initiator = conInstance.getInitiatorList().get(initiatorID);
+
             if(initiator == null){
                 System.err.println("Unknown initiator: "+initiatorID);
                 return;
@@ -100,6 +106,55 @@ public class CommandListener extends Thread{
             }
             
             Connections.getInstance().initializePeerConnection(initiator);
+        }
+        
+        /*********************** P U B L I S H ************************/
+        if(command[0].equalsIgnoreCase(Command.PUBLISH.toString())){
+            int initiatorID;
+            PeerConnection peer = null;
+            
+            try{
+                initiatorID = Integer.parseInt(command[1]);
+            }catch(NumberFormatException ex){
+                System.err.println("Invalid initiatorID: "+command[1]);
+                return;
+            }
+                        
+            if((peer = conInstance.getPeerConnection().get(initiatorID))==null){
+                System.err.println("Not connected to this network.");
+                return;
+            }
+            
+            JFileChooser fc = new JFileChooser();
+            File file;
+            FileObj fileObj;
+            int actionTaken = fc.showOpenDialog(null);
+            if(actionTaken == JFileChooser.APPROVE_OPTION){
+                file = fc.getSelectedFile();
+                fileObj = new FileObj(file,initiatorID);
+                peer.getFilesToPublish().put(fileObj.getID(), fileObj);
+            }
+            else{
+                System.err.println("Publication aborted.");
+                return;
+            }
+            
+            System.out.println();
+            System.out.println("PUBLISHING A FILE TO THE P2P NETWORK: "+command[1]//+"@"+initiator.getPort()
+                    +"\nFileID: "+fileObj.getID()
+                    +"\nFilename : '"+fileObj.getFileName()+"'");
+            System.out.println();
+            
+            peer.getOutgoing().send(Messages.PUBLISH
+                +Messages.REGEX+initiatorID         //network ID
+                
+                +Messages.REGEX+peer.getID()        //publisher ID
+                +Messages.REGEX+peer.getPort()
+                +Messages.REGEX+peer.getAddress()
+                +Messages.REGEX+fileObj.getID()     //file ID
+                +Messages.REGEX+fileObj.getFileName(),  //file Name  
+                InetAddress.getByName(peer.getReference().getInitiatorAddress()), peer.getReference().getInitiatorPort());
+            
         }
    }
 }

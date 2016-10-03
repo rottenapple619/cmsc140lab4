@@ -30,14 +30,14 @@ public class Connections {
     private static Map<Integer, PeerReference> initiatorList;
     private static Map<Integer, PeerConnection> peerConnectionList;
     private static Map<Integer,FileObj> filesLocal;
-    private static Map<Integer,Integer> cacheOfNetworkFiles;
+    private static Map<Integer,FileReference> publishedFiles;
     
     Connections(){
         ID = getRandomID();
         initiatorList = new ConcurrentHashMap<>();
         peerConnectionList = new ConcurrentHashMap<>();
         filesLocal = new ConcurrentHashMap<>();
-        cacheOfNetworkFiles = new ConcurrentHashMap<>();
+        publishedFiles = new ConcurrentHashMap<>();
         
         try {
             addressID = InetAddress.getLocalHost().getHostAddress(); //this should be the one being used as ID
@@ -117,8 +117,8 @@ public class Connections {
         return filesLocal;
     }
     
-    Map<Integer, Integer> getCachedNetworkFiles(){
-        return cacheOfNetworkFiles;
+    Map<Integer, FileReference> getPublishedFiles(){
+        return publishedFiles;
     }
     
 }
