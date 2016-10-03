@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 
 /*
@@ -83,6 +85,55 @@ public class CommandListener extends Thread{
             }
         }
         
+        /***********************N  E  T  W  O  R  K  S************************/
+        else if(command[0].equalsIgnoreCase(Command.NETWORKS.toString())){
+            if(conInstance.getInitiatorList().isEmpty()){
+                System.out.println("No available P2P Network.");
+                return;
+            }
+            System.out.println();
+            System.out.println("List of available P2P Networks:");
+            conInstance.getInitiatorList().forEach( (Integer k,PeerReference peer) -> 
+                    System.out.println("NetworkID: "+peer.getID()+" Port: "+peer.getPort()));
+            System.out.println("-End of List-");
+        }
+        
+        /***********************FILESNETWORK************************/
+        else if(command[0].equalsIgnoreCase(Command.FILESNETWORK.toString())){
+        
+            final int initiatorID;
+            try{
+                initiatorID = Integer.parseInt(command[1]);
+            }catch(NumberFormatException ex){
+                System.err.println("Invalid initiatorID: "+command[1]);
+                return;
+            }
+            
+            PeerReference initiator = conInstance.getInitiatorList().get(initiatorID);
+
+            if(initiator == null){
+                System.err.println("Unknown initiator: "+initiatorID);
+                return;
+            }
+            
+            Map<Integer, FileReference> publishedFiles = 
+                conInstance.getPublishedFiles().entrySet()
+                .stream()
+                .filter(file -> file.getValue().getIniator().getID() == initiatorID)
+                .collect(Collectors.toMap(file -> file.getKey(), file -> file.getValue()));
+            
+            if(publishedFiles.isEmpty()){
+                System.out.println("No published files for the P2P Network: "+initiator.getID()+"@"+initiator.getPort());
+                return;
+            }
+            
+            System.out.println();
+            System.out.println("List of available files in the P2P Network: "+initiator.getID()+"@"+initiator.getPort());
+            publishedFiles.forEach( (Integer i,FileReference file) -> System.out.println("FileID: "+file.getID()+" Filename: "+file.getFileName()));
+            System.out.println("-End of List-");
+        }
+        
+        
         /*********************** J   O   I   N ************************/
         else if(command[0].equalsIgnoreCase(Command.JOIN.toString())){
             int initiatorID = 0;
@@ -109,7 +160,7 @@ public class CommandListener extends Thread{
         }
         
         /*********************** P U B L I S H ************************/
-        if(command[0].equalsIgnoreCase(Command.PUBLISH.toString())){
+        else if(command[0].equalsIgnoreCase(Command.PUBLISH.toString())){
             int initiatorID;
             PeerConnection peer = null;
             

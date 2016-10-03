@@ -25,12 +25,17 @@ public class MulticastProtocol {
         
         /*********************** RECEIVED CREATE MSG ************************/
         if(msg[0].equalsIgnoreCase(Command.CREATE.toString())){
-            if(currConnection.getInitiatorList().containsKey(Integer.parseInt(msg[1]))//check if added or equal to own id
-                    || currConnection.getID() == Integer.parseInt(msg[1])){
+            if(currConnection.getInitiatorList().containsKey(Integer.parseInt(msg[1]))){//check if added or equal to own id
                 return;
             }
-            System.out.println("Received Message: A network by "+msg[1]+"@"+msg[2]+" has been created");
+            
             currConnection.getInitiatorList().put(Integer.parseInt(msg[1]),new PeerReference(msg[1],msg[2],msg[3]));
+            
+            if(currConnection.getID() == Integer.parseInt(msg[1])){
+                return;
+            }
+            
+            System.out.println("Received Message: A network by "+msg[1]+"@"+msg[2]+" has been created");
         }
         
         /*********************** RECEIVED PUBLISH MSG ************************/
