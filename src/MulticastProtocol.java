@@ -25,16 +25,12 @@ public class MulticastProtocol {
         
         /*********************** RECEIVED CREATE MSG ************************/
         if(msg[0].equalsIgnoreCase(Command.CREATE.toString())){
-            //check if added
-            if(currConnection.getInitiatorList().containsKey(Integer.parseInt(msg[1]))
-                    /*currConnection.getInitiatorList().contains(Integer.parseInt(msg[1]))*/
-                    || currConnection.getID() == Integer.parseInt(msg[1])
-                    /*|| currConnection.getID().equals(msg[1])*/ ){
+            if(currConnection.getInitiatorList().containsKey(Integer.parseInt(msg[1]))//check if added or equal to own id
+                    || currConnection.getID() == Integer.parseInt(msg[1])){
                 return;
             }
             System.out.println("Received Message: A network by "+msg[1]+"@"+msg[2]+" has been created");
-            //currConnection.getInitiatorList().add(Integer.parseInt(msg[1]));
-            currConnection.getInitiatorList().put(Integer.parseInt(msg[1]),new PeerReference(msg[1],msg[2],""));
+            currConnection.getInitiatorList().put(Integer.parseInt(msg[1]),new PeerReference(msg[1],msg[2],msg[3]));
         }
         
         /*********************** RECEIVED PUBLISH MSG ************************/
@@ -60,23 +56,9 @@ public class MulticastProtocol {
     
     static void command(String command) throws FileNotFoundException, IOException{
                 
-        /*********************** C  R  E  A  T  E ************************/
-        if(command.equalsIgnoreCase(Command.CREATE.toString())){
-            
-            if(Connections.getInstance().isServer()){//check if nagcreate na
-                System.err.println("Only a single instance of INITIATOR can be created.");
-            }
-            else{
-                Connections.getInstance().initializePeerConnection();
-                PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(Connections.getInstance().getID());
-                System.out.println("Created a new network with ID: "+peer.getID()+"@"+peer.getPort());
-                System.out.println("Initially setting parameters:");
-                System.out.println("Predecessor: "+peer.getReference().getPredecessorID());
-                System.out.println("Successor: "+peer.getReference().getSuccessorID());
-            }
-        }
+        
         /*********************** J   O   I   N ************************/
-        else if(command.startsWith("JOIN")||command.startsWith("join")){
+        if(command.startsWith("JOIN")||command.startsWith("join")){
 
             int initiatorID;
             int initiatorPort;

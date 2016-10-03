@@ -59,7 +59,24 @@ public class CommandListener extends Thread{
         this.isRunning = false;
     }
 
-    private void parse(String command) {
-        System.out.println(command);
+    private void parse(String typedString) {
+        String command[] = typedString.split(Messages.REGEX);
+        Connections conInstance = Connections.getInstance();
+        
+        /*********************** C  R  E  A  T  E ************************/
+        if(command[0].equalsIgnoreCase(Command.CREATE.toString())){
+            
+            if(conInstance.isServer()){//check if nagcreate na
+                System.err.println("Only a single instance of INITIATOR can be created.");
+            }
+            else{
+                conInstance.initializePeerConnection();
+                PeerConnection peer = conInstance.getPeerConnection().get(conInstance.getID());
+                System.out.println("Created a new network with ID: "+peer.getID()+"@"+peer.getPort());
+                System.out.println("Initially setting parameters:");
+                System.out.println("Predecessor: "+peer.getReference().getPredecessorID());
+                System.out.println("Successor: "+peer.getReference().getSuccessorID());
+            }
+        }
    }
 }
