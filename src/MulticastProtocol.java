@@ -56,43 +56,8 @@ public class MulticastProtocol {
     
     static void command(String command) throws FileNotFoundException, IOException{
                 
-        
-        /*********************** J   O   I   N ************************/
-        if(command.startsWith("JOIN")||command.startsWith("join")){
-
-            int initiatorID;
-            int initiatorPort;
-            try{
-                //InetAddress address = null;
-                initiatorID = Integer.parseInt(command.substring(5, command.indexOf("@"))); //ip address dapat
-                /*try {
-                address = InetAddress.getByName(id);
-                } catch (UnknownHostException ex) {
-                    Logger.getLogger(MultiCastProtocol.class.getName()).log(Level.SEVERE, null, ex);
-                }*/
-                initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-            //check if valid id and port
-            //check if same ip
-            }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
-                System.err.println("Invalid address");
-                return;
-            }
-
-            if(!Connections.getInstance().getInitiatorList().containsKey(initiatorID)){
-                System.err.println("Unable to connect to the network ID: "+initiatorID);
-                return;
-            }
-            
-            if(Connections.getInstance().getPeerConnection().get(initiatorID)!=null){
-                System.err.println("Already connected to this network.");
-                return;
-            }
-            
-            
-            Connections.getInstance().initializePeerConnection(initiatorID,initiatorPort);
-        }
         /*********************** P U B L I S H ************************/
-        else if(command.startsWith("PUBLISH")||command.startsWith("publish")){
+        if(command.startsWith("PUBLISH")||command.startsWith("publish")){
             int initiatorID;
             int initiatorPort;
             PeerConnection peer;

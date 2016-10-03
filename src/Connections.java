@@ -73,9 +73,9 @@ public class Connections {
             Logger.getLogger(Connections.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    void initializePeerConnection(int id, int port){
+    void initializePeerConnection(PeerReference initRef){
         try {
-            pConnect = new PeerConnection(id,port);
+            pConnect = new PeerConnection(initRef);
             pConnect.startConnection(false);
             peerConnectionList.put(pConnect.getReference().getInitiatorID(),pConnect);
         } catch (SocketException ex) {

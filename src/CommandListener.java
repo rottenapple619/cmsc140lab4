@@ -78,5 +78,24 @@ public class CommandListener extends Thread{
                 System.out.println("Successor: "+peer.getReference().getSuccessorID());
             }
         }
+        
+        /*********************** J   O   I   N ************************/
+        else if(command[0].equalsIgnoreCase(Command.JOIN.toString())){
+
+            int initiatorID = Integer.parseInt(command[1]);
+            PeerReference initiator = conInstance.getInitiatorList().get(initiatorID);
+            
+            if(initiator == null){
+                System.err.println("Unknown initiator: "+initiatorID);
+                return;
+            }
+            
+            if(conInstance.getPeerConnection().get(initiatorID)!=null){
+                System.err.println("Already connected to this network.");
+                return;
+            }
+            
+            Connections.getInstance().initializePeerConnection(initiator);
+        }
    }
 }

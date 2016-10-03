@@ -23,11 +23,11 @@ public class PeerConnection extends Node{
     private ObjReceiver objReceiver;
     private ObjSender objSender;
     
-    PeerConnection(int id, int port) throws SocketException {
+    PeerConnection(PeerReference initRef) throws SocketException {
         super(false);
         System.out.println("Your ID: "+getID()+" Your Port: "+getPort());
-        this.getReference().updateInitID(id+"");
-        this.getReference().updateInitPort(port+"");
+        this.getReference().updateInitID(initRef.getID()+"");
+        this.getReference().updateInitPort(initRef.getPort()+"");
         this.socket = new DatagramSocket(this.getPort());
         
       
