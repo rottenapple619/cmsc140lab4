@@ -28,9 +28,10 @@ public class PeerConnection extends Node{
         System.out.println("Your ID: "+getID()+" Your Port: "+getPort());
         this.getReference().updateInitID(initRef.getID()+"");
         this.getReference().updateInitPort(initRef.getPort()+"");
+        this.getReference().updateInitAddress(initRef.getAddress()+"");
+        this.getFingerTable().update(getID(), initRef);
         this.socket = new DatagramSocket(this.getPort());
         
-      
         this.incoming = new IncomingListener(this, socket);
         this.outgoing = new OutgoingListener(this, socket);
     }
@@ -39,6 +40,7 @@ public class PeerConnection extends Node{
         super(true);
         this.getReference().updateInitID(getID()+"");
         this.getReference().updateInitPort(getPort()+"");
+        this.getReference().updateInitAddress(getAddress()+"");
         this.notifier = new PeerNotifier(this);
         this.socket = new DatagramSocket(this.getPort());
         

@@ -24,15 +24,6 @@ class Node{
     private final NodeReference reference;
     private final FingerTable fingerTable;
     
-//    private int successorID;
-//    private int successorPort;
-//    
-//    private int predecessorID;
-//    private int predecessorPort;
-//
-//    private int initiatorID;
-//    private int initiatorPort;
-    
     private final int port;
     
     private final boolean isServer;
@@ -54,6 +45,7 @@ class Node{
         if(isServer){
             this.reference.updateSucID(getID()+"");
             this.reference.updateSucPort(port+"");
+            this.reference.updateSucAddress(getAddress());
             
         }
     }
@@ -84,57 +76,14 @@ class Node{
         else*/
             return Connections.getInstance().getID();
     }
-    
-//    int getPredecessorID(){
-//        return predecessorID;
-//    }
-//    
-//    int getPredecessorPort(){
-//        return predecessorPort;
-//    }
-//    
-//    int getSuccessorID(){
-//        return successorID;
-//    }
-//    
-//    int getSuccessorPort(){
-//        return successorPort;
-//    }
-//
-//    int getInitiatorID(){
-//        return initiatorID;
-//    }
-//    
-//    int getInitiatorPort(){
-//        return initiatorPort;
-//    }
+    final String getAddress() {
+        return Connections.getInstance().getAddress();
+    }
+
     
     boolean isServer(){
         return isServer;
     }
-//    void setPID(int id){
-//        predecessorID = id;
-//    }
-//    
-//    void setSID(int id){
-//        successorID = id;
-//    }
-//    
-//    void setPredecessorPort(int port){
-//        predecessorPort = port;
-//    }
-//    
-//    void setSuccessorPort(int port){
-//        successorPort = port;
-//    }
-//    
-//    void setInitiatorID(int id){
-//        initiatorID = id;
-//    }
-//    
-//    void setInitiatorPort(int port){
-//        initiatorPort = port;
-//    }
     
     void addToReferencedFiles(FileReference fileReference) {
         this.referencedFiles.put(fileReference.getID(), fileReference);
@@ -183,4 +132,6 @@ class Node{
         }
         return r;
     }
+
+    
 }

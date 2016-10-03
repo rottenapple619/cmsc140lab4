@@ -28,55 +28,58 @@ public class PeerProtocol implements Messages{
             RECEIVER then sends a TELLPREDECESSOR MESSAGE to the SENDER
         */
         if(msg[0].equalsIgnoreCase(TELLSUCCESSOR)){
-            
+            System.out.println(incomingMessage);
             int netID = Integer.parseInt(msg[1]);
-            int netPORT = Integer.parseInt(msg[2]);
             
-            int predecessorID = Integer.parseInt(msg[3]);
-            int predecessorPORT = Integer.parseInt(msg[4]);
+            int predecessorID = Integer.parseInt(msg[2]);
+            int predecessorPORT = Integer.parseInt(msg[3]);
+            String predecessorADD = msg[4];
             
             int successorID = Integer.parseInt(msg[5]);
             int successorPORT = Integer.parseInt(msg[6]);
+            String successorADD = msg[7];
             
-            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
+            PeerConnection peer = Connections.getInstance().getPeerConnection().get(netID);
             peer.getReference().updatePredID(predecessorID+"");
             peer.getReference().updatePredPort(predecessorPORT+"");
+            peer.getReference().updatePredAddress(predecessorADD);
             peer.getReference().updateSucID(successorID+"");
             peer.getReference().updateSucPort(successorPORT+"");
+            peer.getReference().updateSucAddress(successorADD);
             
-            peer.getOutgoing().send(TELLPREDECESSOR //tell your successor you are the predecessor
+            peer.getOutgoing().send(TELLPREDECESSOR //tell your successor you are the "new" predecessor
                     +REGEX+peer.getReference().getInitiatorID()        //network ID
-                    +REGEX+peer.getReference().getInitiatorPort()
                     +REGEX+peer.getID()                 //receiver's predecessor
-                    +REGEX+peer.getPort(),
-                    InetAddress.getLocalHost(), successorPORT);
+                    +REGEX+peer.getPort()
+                    +REGEX+peer.getAddress(),
+                    InetAddress.getByName(successorADD), successorPORT);
             printStatus(peer);
             
-            peer.getFingerTable().update(peer.getID(), new PeerReference(netID+"",netPORT+"","localhost"));
-            peer.getFingerTable().update(peer.getID(), new PeerReference(predecessorID+"",predecessorPORT+"","localhost"));
-            peer.getFingerTable().update(peer.getID(), new PeerReference(successorID+"",successorPORT+"","localhost"));
+            peer.getFingerTable().update(peer.getID(), new PeerReference(predecessorID+"",predecessorPORT+"",predecessorADD));
+            peer.getFingerTable().update(peer.getID(), new PeerReference(successorID+"",successorPORT+"",successorADD));
             peer.getFingerTable().printFingerTable();
         }
         
         /*
             Received a TELLPREDECESSOR MESSAGE
-            RECEIVER is the PREDECESSOR of the SENDER of this MESSAGE
+            RECEIVER is the SUCCESSOR of the SENDER of this MESSAGE
         */
         else if(msg[0].equalsIgnoreCase(TELLPREDECESSOR)){
             
             int netID = Integer.parseInt(msg[1]);
-            int netPORT = Integer.parseInt(msg[2]);
-            
-            int predecessorID = Integer.parseInt(msg[3]);
-            int predecessorPORT = Integer.parseInt(msg[4]);
+                        
+            int predecessorID = Integer.parseInt(msg[2]);
+            int predecessorPORT = Integer.parseInt(msg[3]);
+            String predecessorADD = msg[4];
             
             PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             peer.getReference().updatePredID(predecessorID+"");
             peer.getReference().updatePredPort(predecessorPORT+"");
+            peer.getReference().updatePredAddress(predecessorADD);
             
             printStatus(peer);
             
-            peer.getFingerTable().update(peer.getID(), new PeerReference(predecessorID+"",predecessorPORT+"","localhost"));
+            peer.getFingerTable().update(peer.getID(), new PeerReference(predecessorID+"",predecessorPORT+"",predecessorADD));
             peer.getFingerTable().printFingerTable();
         }
         else if(msg[0].equalsIgnoreCase(TRANS_REG)){
@@ -99,141 +102,77 @@ public class PeerProtocol implements Messages{
         else if(msg[0].equalsIgnoreCase(FINDSUCCESSOR)){    
             
             int netID = Integer.parseInt(msg[1]);
-            int netPORT = Integer.parseInt(msg[2]);
             
-            int joinID  = Integer.parseInt(msg[3]);
-            int joinPORT = Integer.parseInt(msg[4]);
-            
-            
-            
-            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
+            int joinID = Integer.parseInt(msg[2]);
+            int joinPORT  = Integer.parseInt(msg[3]);
+            String joinAddress  = msg[4];
 
-            if(peer.getReference().getPredecessorID() == 0){ //P2P Network in initial state
-                peer.getReference().updatePredID(joinID+"");
-                peer.getReference().updatePredPort(joinPORT+"");
+            String senderAddress = msg[5];
+            int senderPORT = Integer.parseInt(msg[6]);
+            
+            
+            PeerConnection peer = Connections.getInstance().getPeerConnection().get(netID);
+
+            PeerReference routeToPeer = peer.getFingerTable().getNearestPeer
+                (new PeerReference(peer.getID()+"",peer.getPort()+"",peer.getAddress()), joinID);
+            System.out.println("Message routed to: "+routeToPeer.getID());
+            if(routeToPeer.getID()==peer.getID()){
+                peer.getOutgoing().send(TELLSUCCESSOR //tell your "new successor" about your old successor and you the predessor of 
+                    +REGEX+netID                         //network id
+                    +REGEX+peer.getID()                 //receiver's predecessor
+                    +REGEX+peer.getPort()
+                    +REGEX+peer.getAddress()
+                    +REGEX+peer.getReference().getSuccessorID()        //receiver's successor
+                    +REGEX+peer.getReference().getSuccessorPort()
+                    +REGEX+peer.getReference().getSuccessorAddress(),
+                    InetAddress.getByName(joinAddress), joinPORT);
                 peer.getReference().updateSucID(joinID+"");
                 peer.getReference().updateSucPort(joinPORT+"");
-                peer.getOutgoing().send(TELLSUCCESSOR 
-                    +REGEX+netID                //net ID
-                    +REGEX+netPORT
-                    +REGEX+peer.getID()         //receiver's predecessor
-                    +REGEX+peer.getPort()
-                    +REGEX+peer.getID()         //receiver's successor
-                    +REGEX+peer.getPort(),
-                    InetAddress.getLocalHost(), joinPORT);
-                
-                //TRANSFER CUSTODY OF REGISTERED FILES//
-                Iterator entries = peer.getReferencedFiles().entrySet().iterator();
-                while (entries.hasNext()) {//iterate through the files that are registered to you
-                    Entry thisEntry = (Entry) entries.next();
-                    int key = (int) thisEntry.getKey();
-                    FileReference file = (FileReference) thisEntry.getValue();
-                        
-                    if(((peer.getID()<joinID) && ((joinID < file.getID()) || (file.getID()<peer.getID())))//check if there is a registered 
-                        || ((peer.getID()>joinID) && (file.getID()<peer.getID() && file.getID()>joinID))){//file that will change custody 
-                 
-                        peer.getOutgoing().send(TRANS_REG
-                            +REGEX+netID                         //network id
-                            +REGEX+netPORT
-                            +REGEX+file.getPublisherID()        //file publisher
-                            +REGEX+file.getPublisherPort()
-                            +REGEX+file.getID()                 //file metadata
-                            +REGEX+file.getFileName(),
-                        InetAddress.getLocalHost(), joinPORT);
-                        
-                        entries.remove();
-                    }
-                }//end while
-                
-                peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"","localhost"));
+                peer.getReference().updateSucAddress(joinAddress);
+                printStatus(peer);
+
+                peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"",joinAddress));
                 peer.getFingerTable().printFingerTable();
             }
-            else{//P2P Network in populated state
-                PeerReference routeToPeer = peer.getFingerTable().getNearestPeer
-                    (new PeerReference(peer.getID()+"",peer.getPort()+"","localhost"), joinID);
-                System.out.println("Message routed to: "+routeToPeer.getID());
-                if(routeToPeer.getID()==peer.getID()){
-                    peer.getOutgoing().send(TELLSUCCESSOR //tell your "new successor" about your old successor and you the predessor of 
-                        +REGEX+netID                         //network id
-                        +REGEX+netPORT
-                        +REGEX+peer.getID()                 //receiver's predecessor
-                        +REGEX+peer.getPort()
-                        +REGEX+peer.getReference().getSuccessorID()        //receiver's successor
-                        +REGEX+peer.getReference().getSuccessorPort(),
-                        InetAddress.getLocalHost(), joinPORT);
-                    peer.getReference().updateSucID(joinID+"");
-                    peer.getReference().updateSucPort(joinPORT+"");
-                    printStatus(peer);
-                    
-                    peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"","localhost"));
-                    peer.getFingerTable().printFingerTable();
-                }
-                else{
-                    peer.getOutgoing().send(FINDSUCCESSOR   
-                        +REGEX+netID
-                        +REGEX+netPORT
-                        +REGEX+joinID                   
-                        +REGEX+joinPORT,
-                        InetAddress.getLocalHost(), routeToPeer.getPort());
-                    
-                    peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"","localhost"));
-                    peer.getFingerTable().printFingerTable();
-                }
-//                if((joinID > peer.getID() && joinID <= peer.getReference().getSuccessorID()) //amazing Lyle
-//                    || (peer.getID() > peer.getReference().getSuccessorID() && (joinID > peer.getID() || joinID < peer.getReference().getSuccessorID()))){
-//                    peer.getOutgoing().send(TELLSUCCESSOR //tell your "new successor" about your old successor and you the predessor of 
-//                        +REGEX+netID                         //network id
-//                        +REGEX+netPORT
-//                        +REGEX+peer.getID()                 //receiver's predecessor
-//                        +REGEX+peer.getPort()
-//                        +REGEX+peer.getReference().getSuccessorID()        //receiver's successor
-//                        +REGEX+peer.getReference().getSuccessorPort(),
-//                        InetAddress.getLocalHost(), joinPORT);
-//                    peer.getReference().updateSucID(joinID+"");
-//                    peer.getReference().updateSucPort(joinPORT+"");
-//                    printStatus(peer);
-//                    
-//                    //TRANSFER CUSTODY OF REGISTERED FILES//
-//                    Iterator entries = peer.getReferencedFiles().entrySet().iterator();
-//                    while (entries.hasNext()) {//iterate through the files that are registered to you
-//                        Entry thisEntry = (Entry) entries.next();
-//                        int key = (int) thisEntry.getKey();
-//                        FileReference file = (FileReference) thisEntry.getValue();
-//
-//                        if(((peer.getID()<joinID) && ((joinID < file.getID()) || (file.getID()<peer.getID())))//check if there is a registered 
-//                            || ((peer.getID()>joinID) && (file.getID()<peer.getID() && file.getID()>joinID))){//file that will change custody 
-//
-//                            peer.getOutgoing().send(TRANS_REG
-//                                +REGEX+netID                         //network id
-//                                +REGEX+netPORT
-//                                +REGEX+file.getPublisherID()        //file publisher
-//                                +REGEX+file.getPublisherPort()
-//                                +REGEX+file.getID()                 //file metadata
-//                                +REGEX+file.getFileName(),
-//                            InetAddress.getLocalHost(), joinPORT);
-//
-//                            entries.remove();
-//                        }
-//                    }//end while
-//                    
-//                    peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"","localhost"));
-//                    peer.getFingerTable().printFingerTable();
-//                }
-//                else{
-//                    PeerReference routeToPeer = peer.getFingerTable().getNearestPeer
-//                        (new PeerReference(peer.getID()+"",peer.getPort()+"","localhost"), joinID);
-//                    System.out.println("Routed to: "+routeToPeer.getID());
-//                    peer.getOutgoing().send(FINDSUCCESSOR   //find successor message sent to successor
-//                        +REGEX+netID
-//                        +REGEX+netPORT
-//                        +REGEX+joinID                   
-//                        +REGEX+joinPORT,
-//                        InetAddress.getLocalHost(), routeToPeer.getPort());
-//                    
-//                    peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"","localhost"));
-//                    peer.getFingerTable().printFingerTable();
-//                } 
+            else{
+                peer.getOutgoing().send(FINDSUCCESSOR   
+                    +REGEX+netID
+                    +REGEX+joinID                   
+                    +REGEX+joinPORT
+                    +REGEX+joinAddress,
+                    InetAddress.getByName(routeToPeer.getAddress()), routeToPeer.getPort());
+
+                peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"",joinAddress));
+                peer.getFingerTable().printFingerTable();
             }
+
+//                //TRANSFER CUSTODY OF REGISTERED FILES//
+//                Iterator entries = peer.getReferencedFiles().entrySet().iterator();
+//                while (entries.hasNext()) {//iterate through the files that are registered to you
+//                    Entry thisEntry = (Entry) entries.next();
+//                    int key = (int) thisEntry.getKey();
+//                    FileReference file = (FileReference) thisEntry.getValue();
+//                        
+//                    if(((peer.getID()<joinID) && ((joinID < file.getID()) || (file.getID()<peer.getID())))//check if there is a registered 
+//                        || ((peer.getID()>joinID) && (file.getID()<peer.getID() && file.getID()>joinID))){//file that will change custody 
+//                 
+//                        peer.getOutgoing().send(TRANS_REG
+//                            +REGEX+netID                         //network id
+//                            +REGEX+netPORT
+//                            +REGEX+file.getPublisherID()        //file publisher
+//                            +REGEX+file.getPublisherPort()
+//                            +REGEX+file.getID()                 //file metadata
+//                            +REGEX+file.getFileName(),
+//                        InetAddress.getLocalHost(), joinPORT);
+//                        
+//                        entries.remove();
+//                    }
+//                }//end while
+//                
+//                peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"","localhost"));
+//                peer.getFingerTable().printFingerTable();
+//            }
+
 
             
         }

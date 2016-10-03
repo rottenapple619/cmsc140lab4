@@ -81,10 +81,14 @@ public class CommandListener extends Thread{
         
         /*********************** J   O   I   N ************************/
         else if(command[0].equalsIgnoreCase(Command.JOIN.toString())){
-
-            int initiatorID = Integer.parseInt(command[1]);
+            int initiatorID = 0;
+            try{
+                initiatorID = Integer.parseInt(command[1]);
+            }catch(NumberFormatException ex){
+                System.err.println("Invalid initiatorID: "+command[1]);
+                return;
+            }
             PeerReference initiator = conInstance.getInitiatorList().get(initiatorID);
-            
             if(initiator == null){
                 System.err.println("Unknown initiator: "+initiatorID);
                 return;
