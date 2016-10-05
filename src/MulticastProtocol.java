@@ -1,11 +1,4 @@
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import javax.swing.JFileChooser;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -36,7 +29,7 @@ public class MulticastProtocol {
             }
             
             System.out.println("Received Message: A network by "+msg[1]+"@"+msg[2]+" has been created");
-        }
+        }//end CREATE
         
         /*********************** RECEIVED PUBLISH MSG ************************/
         else if(msg[0].equalsIgnoreCase(Messages.PUBLISH)){
@@ -67,7 +60,7 @@ public class MulticastProtocol {
                     +"\nFilename: '"+fileName+"'"
                     +"\nPublished by: "+publisherID+"@"+publisherPORT);
             System.out.println();
-        }
+        }//END PUBLISH
         
         /*********************** RECEIVED DELETE MSG ************************/
         else if(msg[0].equalsIgnoreCase(Messages.DELETE)){
@@ -91,121 +84,7 @@ public class MulticastProtocol {
                 "FileName: "+filename);
 //                "Deleted by: "+peer.getID()+"@"+peer.getPort()+"(You)");
             System.out.println();
-        }
-    }
-        
-    
-    
-    
-    static void command(String command) throws FileNotFoundException, IOException{
-                
-
-        
-        
-//        /*********************** F I L E S K E P T ************************/
-//        else if(command.startsWith("FILESKEPT")||command.startsWith("fileskept")){
-//            int initiatorID;
-//            int initiatorPort;
-//            PeerConnection peer;
-//            try{
-//                initiatorID = Integer.parseInt(command.substring(10,command.indexOf("@")));
-//                initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-//                peer = Connections.getInstance().getPeerConnection.get(initiatorID);
-//            }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
-//                System.err.println("Invalid address");
-//                return;
-//            }
-//            
-//            if(peer==null){
-//                System.err.println("Not connected to "+initiatorID+"@"+initiatorPort);
-//                return;
-//            }
-//            
-//            if(peer.getFilesInNetwork().isEmpty()){
-//                System.out.println("There are no files that you keep for the P2P network: "+initiatorID+"@"+initiatorPort);
-//            }
-//            else{
-//                System.out.println();
-//                System.out.println("FILE(S) YOU KEEP: "+peer.getFilesInNetwork().size()+" FOR THE P2P NETWORK: "+initiatorID+"@"+initiatorPort);
-//                for(FileObj file : peer.getFilesInNetwork()){
-//                    System.out.println("ID: "+file.getID()+" Filename: "+file.getName());
-//                }
-//                System.out.println();
-//            }
-//            
-//        }
-        
-        /*********************** F I L E S L O C A L ************************/
-        if(command.equalsIgnoreCase(Command.FILESLOCAL.toString())){
-          if(Connections.getInstance().getLocalFiles().isEmpty()){
-                System.out.println("Files empty..");
-            }
-            else{
-                System.out.println();
-                System.out.println("Local Files: ");
-                Iterator entries = Connections.getInstance().getLocalFiles().entrySet().iterator();
-                
-                while (entries.hasNext()) {
-                    Entry thisEntry = (Entry) entries.next();
-                    int key = (int) thisEntry.getKey();
-                    FileObj file = (FileObj) thisEntry.getValue();
-                    System.out.println("ID: "+key+" Filename: "+file.getFileName());
-                }
-                System.out.println();
-            }
-            
-        }
-        /*********************** F I L E S N E T W O R K ************************/ 
-        else if(command.startsWith("FILESNETWORK")||command.startsWith("filesnetwork")){
-            int initiatorID;
-            int initiatorPort;
-            PeerConnection peer;
-            try{
-                initiatorID = Integer.parseInt(command.substring(13,command.indexOf("@")));
-                initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(initiatorID);
-            }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
-                System.err.println("Invalid address");
-                return;
-            }
-            
-            if(peer==null){
-                System.err.println("Not connected to "+initiatorID+"@"+initiatorPort);
-                return;
-            }
-            
-            
-//            Connections.getInstance().getCachedNetworkFiles().clear();
-            System.out.println();
-            System.out.println("FILES IN THE P2P NETWORK: "+initiatorID+"@"+initiatorPort);
-            peer.getOutgoing().send(Messages.FILESNETWORK
-                +Messages.REGEX+initiatorID     //net ID
-                +Messages.REGEX+initiatorPort
-                +Messages.REGEX+peer.getID()    //your ID / request ID
-                +Messages.REGEX+peer.getPort(), 
-                InetAddress.getLocalHost(), initiatorPort); //sent to P2P network Initiator/Creator
-        }
-        /*********************** C O M M A N D ************************/
-        else if(command.equalsIgnoreCase(Command.COMMAND.toString())){
-            System.out.println();
-            System.out.println("AVAILABLE COMMANDS:");
-            
-                
-            for(Command c: Command.values()){
-                System.out.println();
-                System.out.println(c.toString()+"\n\tDescription - "+c.getDescription()
-                                    +"\n\tSyntax - "+c.getSyntax());
-            }
-            System.out.println();
-        }
-        
-        else if(command.equalsIgnoreCase(Command.EXIT.toString())){
-            System.exit(0);
-        }
-        /*********************** I N V A L I D ************************/
-        else{
-            System.err.println("Invalid command");
-        }
+        }//end DELETE
     }
     
 }

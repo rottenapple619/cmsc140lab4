@@ -96,7 +96,7 @@ public class CommandListener extends Thread{
             conInstance.getInitiatorList().forEach( (Integer k,PeerReference peer) -> 
                     System.out.println("NetworkID: "+peer.getID()+" Port: "+peer.getPort()));
             System.out.println("-End of List-");
-        }
+        }//end NETWORKS
         
         /***********************FILESNETWORK************************/
         else if(command[0].equalsIgnoreCase(Command.FILESNETWORK.toString())){
@@ -303,5 +303,38 @@ public class CommandListener extends Thread{
                     +Messages.REGEX+fileRef.getID(),
                 InetAddress.getByName(initiator.getAddress()), initiator.getPort());
         }//END RETRIEVE
+        
+        /*********************** F I L E S L O C A L ************************/
+        else if(command[0].equalsIgnoreCase(Command.FILESLOCAL.toString())){
+            if(conInstance.getLocalFiles().isEmpty()){
+                System.out.println("No files stored.");
+                return;
+            }
+            System.out.println();
+            System.out.println("List of files stored locally:");
+            conInstance.getLocalFiles().forEach( (Integer id,FileObj file) -> 
+                    System.out.println("FileID: "+file.getID()+" Filename: "+file.getFileName()));
+            System.out.println("-End of List-");
+        }//end FILESLOCAL
+        
+        /*********************** C O M M A N D ************************/
+        else if(command[0].equalsIgnoreCase(Command.COMMAND.toString())){
+            System.out.println();
+            System.out.println("AVAILABLE COMMANDS:");
+            
+                
+            for(Command c: Command.values()){
+                System.out.println();
+                System.out.println(c.toString()+"\n\tDescription - "+c.getDescription()
+                                    +"\n\tSyntax - "+c.getSyntax());
+            }
+            System.out.println();
+        }//end COMMAND
+        
+        
+        /*********************** I N V A L I D ************************/
+        else{
+            System.err.println("Invalid command");
+        }//end INVALID
    }
 }
