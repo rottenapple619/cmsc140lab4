@@ -39,7 +39,7 @@ public class MulticastProtocol {
         }
         
         /*********************** RECEIVED PUBLISH MSG ************************/
-        if(msg[0].equalsIgnoreCase(Messages.PUBLISH)){
+        else if(msg[0].equalsIgnoreCase(Messages.PUBLISH)){
             
             int netID = Integer.parseInt(msg[1]);//P2P initiator
             int netPORT = Integer.parseInt(msg[2]);
@@ -66,6 +66,30 @@ public class MulticastProtocol {
                     +"\nFileID: "+fileID
                     +"\nFilename: '"+fileName+"'"
                     +"\nPublished by: "+publisherID+"@"+publisherPORT);
+            System.out.println();
+        }
+        
+        /*********************** RECEIVED DELETE MSG ************************/
+        else if(msg[0].equalsIgnoreCase(Messages.DELETE)){
+            
+            int netID = Integer.parseInt(msg[1]);
+            
+            int publisherID = Integer.parseInt(msg[2]);
+            int publisherPORT = Integer.parseInt(msg[3]);
+            String publisherADD = msg[4];
+            
+            int fileID = Integer.parseInt(msg[5]);
+            String filename = msg[6];
+            
+            Connections.getInstance().getPublishedFiles().remove(fileID);
+            PeerReference initiator = Connections.getInstance().getInitiatorList().get(netID);
+            
+            System.out.println();
+            System.out.println("A file has been successfully DELETED from "+publisherID+"@"+publisherPORT+"\n"+
+                "For the P2P Network: " +initiator.getID() +"@"+ initiator.getPort()+"\n"+
+                "FileID: "+fileID+ "\n"+
+                "FileName: "+filename);
+//                "Deleted by: "+peer.getID()+"@"+peer.getPort()+"(You)");
             System.out.println();
         }
     }
@@ -113,41 +137,6 @@ public class MulticastProtocol {
                 InetAddress.getLocalHost(), initiatorPort);
             
             
-        }
-        /*********************** D  E   L   E   T   E ************************/
-        else if(command.startsWith("DELETE")||command.startsWith("delete")){
-            int fileID;
-            int initiatorID;
-            int initiatorPort;
-            PeerConnection peer;
-            try{
-                fileID = Integer.parseInt(command.substring(command.indexOf(" ")+1,command.lastIndexOf(" ")));
-                initiatorID = Integer.parseInt(command.substring(command.lastIndexOf(" ")+1,command.indexOf("@")));
-                initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(initiatorID);
-            }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
-                System.err.println("Invalid address");
-                return;
-            }
-            
-            if(peer==null){
-                System.err.println("Not connected to "+initiatorID+"@"+initiatorPort);
-                return;
-            }
-
-            System.out.println();
-            System.out.println("DELETING A FILE TO THE P2P NETWORK: "+initiatorID+"@"+initiatorPort
-                    +"\nFileID: "+fileID);
-//                    +"\nFilename : '"+fileObj.getName()+"'");
-            System.out.println();
-            
-            peer.getOutgoing().send(Messages.DELETE //send a delete msg to the initiator
-                +Messages.REGEX+initiatorID
-                +Messages.REGEX+initiatorPort
-                +Messages.REGEX+peer.getID()
-                +Messages.REGEX+peer.getPort()
-                +Messages.REGEX+fileID,
-                InetAddress.getLocalHost(), initiatorPort);
         }
         
 //        /*********************** F I L E S K E P T ************************/

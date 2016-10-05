@@ -129,14 +129,15 @@ public class CommandListener extends Thread{
             
             System.out.println();
             System.out.println("List of available files in the P2P Network: "+initiator.getID()+"@"+initiator.getPort());
-            publishedFiles.forEach( (Integer i,FileReference file) -> System.out.println("FileID: "+file.getID()+" Filename: "+file.getFileName()));
+            publishedFiles.forEach( (Integer i,FileReference file) -> 
+                System.out.println("FileID: "+file.getID()+" Filename: "+file.getFileName()));
             System.out.println("-End of List-");
         }
         
         
         /*********************** J   O   I   N ************************/
         else if(command[0].equalsIgnoreCase(Command.JOIN.toString())){
-            int initiatorID = 0;
+            int initiatorID;
             try{
                 initiatorID = Integer.parseInt(command[1]);
             }catch(NumberFormatException ex){
@@ -162,12 +163,12 @@ public class CommandListener extends Thread{
         /*********************** P U B L I S H ************************/
         else if(command[0].equalsIgnoreCase(Command.PUBLISH.toString())){
             int initiatorID;
-            PeerConnection peer = null;
+            PeerConnection peer;
             
             try{
                 initiatorID = Integer.parseInt(command[1]);
-            }catch(NumberFormatException ex){
-                System.err.println("Invalid initiatorID: "+command[1]);
+            }catch(ArrayIndexOutOfBoundsException | NumberFormatException ex){
+                System.err.println("Invalid initiatorID");
                 return;
             }
                         
@@ -206,6 +207,53 @@ public class CommandListener extends Thread{
                 +Messages.REGEX+fileObj.getFileName(),  //file Name  
                 InetAddress.getByName(peer.getReference().getInitiatorAddress()), peer.getReference().getInitiatorPort());
             
+        }//END PUBLISH
+        
+        /*********************** D  E   L   E   T   E ************************/
+        else if(command[0].equalsIgnoreCase(Command.DELETE.toString())){
+            FileReference fileRef;
+            int initiatorID;
+            PeerConnection peer;
+            PeerReference initiator;
+            try{
+                fileRef = conInstance.getPublishedFiles().get(Integer.parseInt(command[1]));
+                initiatorID = Integer.parseInt(command[2]);
+                peer = conInstance.getPeerConnection().get(initiatorID);
+                initiator = conInstance.getInitiatorList().get(initiatorID);
+            }catch(ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException | NumberFormatException ex){
+                System.err.println("Invalid address");
+                return;
+            }
+            
+            if(fileRef==null){
+                System.err.println("File not found!");
+                return;
+            }
+            
+            if(initiator == null){
+                System.err.println("Unknown initiator: "+initiatorID);
+                return;
+            }
+            
+            if(peer==null){
+                System.err.println("Not connected to "+initiator.getID()+"@"+initiator.getPort());
+                return;
+            }
+
+            System.out.println();
+            System.out.println("DELETING A FILE TO THE P2P NETWORK: "+initiator.getID()+"@"+initiator.getPort()
+                    +"\nFileID: "+fileRef.getID()
+                    +"\nFilename : '"+fileRef.getFileName()+"'");
+            System.out.println();
+            
+            peer.getOutgoing().send(Messages.DELETE //send a delete msg to the initiator
+                +Messages.REGEX+initiatorID
+                
+                +Messages.REGEX+peer.getID()
+                +Messages.REGEX+peer.getPort()
+                +Messages.REGEX+peer.getAddress()
+                +Messages.REGEX+fileRef.getID(),
+                InetAddress.getByName(initiator.getAddress()), initiator.getPort());
         }
    }
 }

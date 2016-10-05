@@ -103,21 +103,19 @@ class Node{
     }
     
     FileReference deleteReference(int fileID){
-        FileReference r = null;
-        if(this.referencedFiles.containsKey(fileID)){
-            r = this.referencedFiles.get(fileID);
-            this.referencedFiles.remove(fileID);
+        FileReference fr;
+        if((fr=this.referencedFiles.remove(fileID))!=null){
             System.out.println();
             System.out.print("A file has been UNREGISTERED to you for the P2P Network: " +this.reference.getInitiatorID() +"@"+ this.reference.getInitiatorPort() +"\n"+
-                "FileID: "+r.getID()+ "\n"+
-                "FileName: "+r.getFileName()+ "\n"+
-                "Published by: "+r.getPublisherID()+"@"+r.getPublisherPort());
-            if(r.getPublisherID()==this.getID())
+                "FileID: "+fr.getID()+ "\n"+
+                "FileName: "+fr.getFileName()+ "\n"+
+                "Published by: "+fr.getPublisherID()+"@"+fr.getPublisherPort());
+            if(fr.getPublisherID()==this.getID())
                 System.out.print("(You)\n");
             else
                 System.out.println();
         }
-        return r;
+        return fr;
     }
     
     void publishFile(int fileID){
@@ -127,21 +125,20 @@ class Node{
         this.publishedFiles.put(fileID, fileNotifier);
     }
     
-//    FileObj deleteNetworkFile(int fileID){
-//        FileObj r = null;
-//        if(this.filesNetwork.containsKey(fileID)){
-//            r = this.filesNetwork.get(fileID);
-//            this.filesNetwork.remove(fileID);
-//            System.out.println();
-//            System.out.print("A file has been DELETED to you for the P2P Network: " +this.reference.getInitiatorID() +"@"+ this.reference.getInitiatorPort() +"\n"+
-//                "FileID: "+r.getID()+ "\n"+
-//                "FileName: "+r.getFileName()+ "\n"+
-//                "Published by: "+this.getID()+"@"+this.getPort());
-//            System.out.print("(You)\n");
-//            
-//        }
-//        return r;
-//    }
+    FileObjNotifier deleteNetworkFile(int fileID){
+        FileObjNotifier fon;
+        if((fon = this.publishedFiles.remove(fileID))!=null){
+            fon.stopThread();
+            System.out.println();
+            System.out.print("A file has been DELETED to you for the P2P Network: " +this.reference.getInitiatorID() +"@"+ this.reference.getInitiatorPort() +"\n"+
+                "FileID: "+fon.getFileObj().getID()+ "\n"+
+                "FileName: "+fon.getFileObj().getFileName()+ "\n"+
+                "Published by: "+this.getID()+"@"+this.getPort());
+            System.out.print("(You)\n");
+            
+        }
+        return fon;
+    }
 
     
 }
