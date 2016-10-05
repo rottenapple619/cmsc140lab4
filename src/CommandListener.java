@@ -254,6 +254,54 @@ public class CommandListener extends Thread{
                 +Messages.REGEX+peer.getAddress()
                 +Messages.REGEX+fileRef.getID(),
                 InetAddress.getByName(initiator.getAddress()), initiator.getPort());
-        }
+        }//END DELETE
+        
+        /*********************** R  E  T  R  I  E  V  E ************************/
+        else if(command[0].equalsIgnoreCase(Command.RETRIEVE.toString())){
+            FileReference fileRef;
+            int initiatorID;
+            PeerConnection peer;
+            PeerReference initiator;
+            try{
+                fileRef = conInstance.getPublishedFiles().get(Integer.parseInt(command[1]));
+                initiatorID = Integer.parseInt(command[2]);
+                peer = conInstance.getPeerConnection().get(initiatorID);
+                initiator = conInstance.getInitiatorList().get(initiatorID);
+            }catch(ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException | NumberFormatException ex){
+                System.err.println("Invalid address");
+                return;
+            }
+            
+            if(fileRef==null){
+                System.err.println("File not found!");
+                return;
+            }
+            
+            if(initiator == null){
+                System.err.println("Unknown initiator: "+initiatorID);
+                return;
+            }
+            
+            if(peer==null){
+                System.err.println("Not connected to "+initiator.getID()+"@"+initiator.getPort());
+                return;
+            }
+            
+            System.out.println();
+            System.out.println("RETRIEVING A FILE IN THE P2P NETWORK: "+initiator.getID()+"@"+initiator.getPort()
+                + "\nFileID: "+fileRef.getID()
+                /*+ "\nFilename: '"+file.getName()+"'"*/
+                + "\nRequested by: "+peer.getID()+"@"+peer.getPort()+"(You)");
+            System.out.println();
+            
+            peer.getOutgoing().send(Messages.RETRIEVE
+                    +Messages.REGEX+initiator.getID()
+                    
+                    +Messages.REGEX+peer.getID()
+                    +Messages.REGEX+peer.getPort()
+                    +Messages.REGEX+peer.getAddress()
+                    +Messages.REGEX+fileRef.getID(),
+                InetAddress.getByName(initiator.getAddress()), initiator.getPort());
+        }//END RETRIEVE
    }
 }

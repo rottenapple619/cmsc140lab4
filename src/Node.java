@@ -20,9 +20,6 @@ class Node{
     private final Map<Integer, FileObj> filesToPublish;
     private final Map<Integer, FileReference> referencedFiles;
     private final Map<Integer, FileObjNotifier> publishedFiles;
-    
-    private ObjSender objSender;
-    private ObjReceiver ojbReceiver;
         
     private final NodeReference reference;
     private final FingerTable fingerTable;
@@ -59,6 +56,10 @@ class Node{
     
     NodeReference getReference(){
         return this.reference;
+    }
+
+    Map<Integer, FileObjNotifier> getPublishedFiles(){
+        return this.publishedFiles;
     }
     
     Map<Integer, FileReference> getReferencedFiles(){
@@ -140,5 +141,8 @@ class Node{
         return fon;
     }
 
+    FileObj getPublishedFile(int fileID){
+        return this.publishedFiles.get(fileID).getFileObj();
+    }
     
 }

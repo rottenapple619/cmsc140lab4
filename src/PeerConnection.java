@@ -61,30 +61,30 @@ public class PeerConnection extends Node{
         return this.outgoing;
     }
     
-    ObjSender getObjSender(){
-        return this.objSender;
-    }
+//    ObjSender getObjSender(){
+//        return this.objSender;
+//    }
 
-    void openObjReceiver(String type, int sID, int sPORT, int objPORT) {
-        objReceiver = new ObjReceiver(type, this, sID, sPORT, objPORT);
+    void openObjReceiver(String type, int sID, int sPORT, String sADD, int objPORT) {
+        objReceiver = new ObjReceiver(type, this, sID, sPORT, sADD, objPORT);
         objReceiver.startReceiving();
     }
 
     
-//    void openObjSender(String type,int rID, int rPORT, int fID) {
-//        FileObj file = null;
-//        
-//        if(type.equalsIgnoreCase(Messages.RETRIEVE)){
-//            file = (FileObj) this.getFilesInNetwork().get(fID);
-//            objSender = new ObjSender(Messages.RETRIEVE, this, rID, rPORT, file);
-//        }
-//        /*else if(type.equalsIgnoreCase(Messages.PUBLISH)){
-//            file = this.getFilesToPublish().getFile(fID);
-//            objSender = new ObjSender(Messages.PUBLISH, this, rID, rPORT, file);
-//        }*/
-//        
-//        objSender.startSending();
-//    }
+    void openObjSender(String type,int rID, int rPORT, String rADD, int fID) {
+        FileObj file = null;
+        
+        if(type.equalsIgnoreCase(Messages.RETRIEVE)){
+            file = this.getPublishedFile(fID);
+            objSender = new ObjSender(Messages.RETRIEVE, this, rID, rPORT, rADD, file);
+        }
+        /*else if(type.equalsIgnoreCase(Messages.PUBLISH)){
+            file = this.getFilesToPublish().getFile(fID);
+            objSender = new ObjSender(Messages.PUBLISH, this, rID, rPORT, file);
+        }*/
+        
+        objSender.startSending();
+    }
 
     
 

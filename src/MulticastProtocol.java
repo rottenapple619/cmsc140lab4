@@ -100,44 +100,7 @@ public class MulticastProtocol {
     static void command(String command) throws FileNotFoundException, IOException{
                 
 
-        /*********************** R  E  T  R  I  E  V  E ************************/
-        if(command.startsWith("RETRIEVE")||command.startsWith("retrieve")){
-            int fileID;
-            int initiatorID;
-            int initiatorPort;
-            PeerConnection peer;
-            try{
-                fileID = Integer.parseInt(command.substring(command.indexOf(" ")+1,command.lastIndexOf(" ")));
-                initiatorID = Integer.parseInt(command.substring(command.lastIndexOf(" ")+1,command.indexOf("@")));
-                initiatorPort = Integer.parseInt(command.substring(command.indexOf("@")+1));
-                peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(initiatorID);
-            }catch(StringIndexOutOfBoundsException | NumberFormatException ex){
-                System.err.println("Invalid address");
-                return;
-            }
-            
-            if(peer==null){
-                System.err.println("Not connected to "+initiatorID+"@"+initiatorPort);
-                return;
-            }
-            
-            System.out.println();
-            System.out.println("RETRIEVING A FILE IN THE P2P NETWORK: "+initiatorID+"@"+initiatorPort
-                + "\nFileID: "+fileID
-                /*+ "\nFilename: '"+file.getName()+"'"*/
-                + "\nRequested by: "+peer.getID()+"@"+peer.getPort()+"(You)");
-            System.out.println();
-            
-            peer.getOutgoing().send(Messages.RETRIEVE
-                    +Messages.REGEX+initiatorID
-                    +Messages.REGEX+initiatorPort
-                    +Messages.REGEX+peer.getID()
-                    +Messages.REGEX+peer.getPort()
-                    +Messages.REGEX+fileID,
-                InetAddress.getLocalHost(), initiatorPort);
-            
-            
-        }
+        
         
 //        /*********************** F I L E S K E P T ************************/
 //        else if(command.startsWith("FILESKEPT")||command.startsWith("fileskept")){
@@ -173,7 +136,7 @@ public class MulticastProtocol {
 //        }
         
         /*********************** F I L E S L O C A L ************************/
-        else if(command.equalsIgnoreCase(Command.FILESLOCAL.toString())){
+        if(command.equalsIgnoreCase(Command.FILESLOCAL.toString())){
           if(Connections.getInstance().getLocalFiles().isEmpty()){
                 System.out.println("Files empty..");
             }

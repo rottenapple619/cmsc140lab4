@@ -23,6 +23,7 @@ class ObjSender extends Thread{
     
     private final int receiverID;
     private final int receiverPORT;
+    private final String receiverADD;
     private final int objPORT;
     private final FileObj file;
     private final PeerConnection node;
@@ -32,11 +33,12 @@ class ObjSender extends Thread{
     private ObjectOutput out;
     private final String transferType;
     
-    ObjSender(String type,PeerConnection node, int rID, int rPORT, FileObj file) {
+    ObjSender(String type,PeerConnection node, int rID, int rPORT, String rADD, FileObj file) {
         this.transferType = type;
         this.node = node;
         this.receiverID = rID;
         this.receiverPORT = rPORT;
+        this.receiverADD = rADD;
         this.objPORT = AvailablePort.getAvailablePort();
         this.file = file;
     }
@@ -46,14 +48,15 @@ class ObjSender extends Thread{
         try {
             sSocket = new ServerSocket(objPORT);
             node.getOutgoing().send(Messages.INIT_RECEIVE
-                    /*+Messages.REGEX+this.transferType*/
-                    +Messages.REGEX+node.getReference().getInitiatorID()
-                    +Messages.REGEX+node.getReference().getInitiatorPort()
-                    +Messages.REGEX+node.getID()
-                    +Messages.REGEX+node.getPort()
-                    +Messages.REGEX+objPORT
+                /*+Messages.REGEX+this.transferType*/
+                +Messages.REGEX+node.getReference().getInitiatorID()
+
+                +Messages.REGEX+node.getID()
+                +Messages.REGEX+node.getPort()
+                +Messages.REGEX+node.getAddress()
+                +Messages.REGEX+objPORT
                     /*+Messages.REGEX+fileID*/,
-                    InetAddress.getLocalHost(), receiverPORT);
+                InetAddress.getByName(receiverADD), receiverPORT);
             this.start();
         } catch (UnknownHostException ex) {
             Logger.getLogger(ObjSender.class.getName()).log(Level.SEVERE, null, ex);

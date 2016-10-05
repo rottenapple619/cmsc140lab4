@@ -20,28 +20,28 @@ class ObjReceiver extends Thread{
 
     private final PeerConnection node;
     private final int senderID;
-//    private final int fileID;
     private final int senderPORT;
+    private final String senderADD;
     private final int objPORT;
 
     private Socket cSocket;
     private ObjectInput in;
     private final String transferType;
     
-    ObjReceiver(String type, PeerConnection node, int sID, int sPORT, int objPORT) {
+    ObjReceiver(String type, PeerConnection node, int sID, int sPORT, String sADD, int objPORT) {
         this.transferType = type;
         this.node = node;
         this.senderID = sID;
         this.senderPORT = sPORT;
+        this.senderADD = sADD;
         this.objPORT = objPORT;
-        //this.fileID = fileID;
     }
     
     @Override
     public void run(){
 
         try {
-            cSocket = new Socket(InetAddress.getLocalHost(), objPORT);
+            cSocket = new Socket(InetAddress.getByName(senderADD), objPORT);
             System.out.println();
             System.out.println("Connected to: "+senderID);
             System.out.println("Receiving file(s) from: "+senderID+"...");
@@ -50,21 +50,10 @@ class ObjReceiver extends Thread{
             System.out.println("Received file: "+f.getFileName()+" with ID: "+f.getID());
             System.out.println("Receiving file(s) from: "+senderID+" completed.");
             
-//            if(this.transferType.equalsIgnoreCase(Messages.PUBLISH)){
-//            //    node.getFilesInNetwork().addToList(f);
-//            
-//                Connections.getInstance().getMulticastConnection().getOutgoing().send(Messages.PUBLISH//broadcast to Multicast Network
-//                +Messages.REGEX+node.getID()                                                            //that a new file is published
-//                +Messages.REGEX+node.getPort()
-//                +Messages.REGEX+node.getInitiatorID()
-//                +Messages.REGEX+node.getInitiatorPort()
-//                +Messages.REGEX+f.getFileName()
-//                +Messages.REGEX+f.getID());
-//            }
-//            else{
-                Connections.getInstance().getLocalFiles().put(f.getID(), f);
-                System.out.println("'"+f.getFileName()+"' has been retrieved and saved to local files.");
-//            }
+
+            Connections.getInstance().getLocalFiles().put(f.getID(), f);
+            System.out.println("'"+f.getFileName()+"' has been retrieved and saved to local files.");
+
             
             
         } catch (IOException | ClassNotFoundException ex) {
