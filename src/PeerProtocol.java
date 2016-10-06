@@ -47,7 +47,7 @@ public class PeerProtocol implements Messages{
             peer.getReference().updateSucPort(successorPORT+"");
             peer.getReference().updateSucAddress(successorADD);
             
-            peer.getOutgoing().send(TELLPREDECESSOR //tell your successor you are the "new" predecessor
+            peer.getOutgoing().send(TELLPREDECESSOR //tell the successor of the sender you are the "new" predecessor
                     +REGEX+peer.getReference().getInitiatorID()        //network ID
                     +REGEX+peer.getID()                 //receiver's predecessor
                     +REGEX+peer.getPort()
@@ -83,20 +83,26 @@ public class PeerProtocol implements Messages{
             peer.getFingerTable().printFingerTable();
         }//end TELLPREDECESSOR
         
+        /*
+            Received TRANS_REG Message
+        */
         else if(msg[0].equalsIgnoreCase(TRANS_REG)){
             int netID = Integer.parseInt(msg[1]);
-            int netPORT = Integer.parseInt(msg[2]);
             
-            int publisherID  = Integer.parseInt(msg[3]);
-            int publisherPORT = Integer.parseInt(msg[4]);
+            
+            int publisherID  = Integer.parseInt(msg[2]);
+            int publisherPORT = Integer.parseInt(msg[3]);
+            String publisherADD = msg[4];
             
             int fileID = Integer.parseInt(msg[5]);
             String fileName = msg[6];
             
             PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
             
-            //peer.addToReferencedFiles(new FileReference(fileID,fileName,publisherID,publisherPORT));
-        }
+            peer.addToReferencedFiles(new FileReference(fileID,fileName,
+                    new PeerReference(publisherID+"",publisherPORT+"",publisherADD),
+                    Connections.getInstance().getInitiatorList().get(netID)));
+        }//end TRANS_REG
         
         /*
             Received a FINDSUCCESSOR MESSAGE
@@ -118,7 +124,7 @@ public class PeerProtocol implements Messages{
                 (new PeerReference(peer.getID()+"",peer.getPort()+"",peer.getAddress()), joinID);
             System.out.println("Message routed to: "+routeToPeer.getID());
             if(routeToPeer.getID()==peer.getID()){
-                peer.getOutgoing().send(TELLSUCCESSOR //tell your "new successor" about your old successor and you the predessor of 
+                peer.getOutgoing().send(TELLSUCCESSOR //tell your "new successor" about your old successor
                     +REGEX+netID                         //network id
                     +REGEX+peer.getID()                 //receiver's predecessor
                     +REGEX+peer.getPort()
@@ -127,12 +133,37 @@ public class PeerProtocol implements Messages{
                     +REGEX+peer.getReference().getSuccessorPort()
                     +REGEX+peer.getReference().getSuccessorAddress(),
                     InetAddress.getByName(joinAddress), joinPORT);
-                peer.getReference().updateSucID(joinID+"");
+                
+                peer.getReference().updateSucID(joinID+"");//update successor
                 peer.getReference().updateSucPort(joinPORT+"");
                 peer.getReference().updateSucAddress(joinAddress);
                 printStatus(peer);
 
-                peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"",joinAddress));
+                
+                //TRANSFER CUSTODY OF REGISTERED/REFERENCED FILES
+                Iterator entries = peer.getReferencedFiles().entrySet().iterator();
+                while (entries.hasNext()) {//iterate through the files that are registered to you
+                    Entry thisEntry = (Entry) entries.next();
+                    int key = (int) thisEntry.getKey();
+                    FileReference file = (FileReference) thisEntry.getValue();
+                        
+                    if(((peer.getID()<joinID) && ((joinID < file.getID()) || (file.getID()<peer.getID())))//check if there is a registered 
+                        || ((peer.getID()>joinID) && (file.getID()<peer.getID() && file.getID()>joinID))){//file that will change custody 
+                        peer.getOutgoing().send(TRANS_REG
+                            +REGEX+netID                         //network id
+                
+                            +REGEX+file.getPublisherID()        //file publisher
+                            +REGEX+file.getPublisherPort()
+                            +REGEX+file.getPublisherAddress()
+                            +REGEX+file.getID()                 //file metadata
+                            +REGEX+file.getFileName(),
+                        InetAddress.getByName(joinAddress), joinPORT);
+                        entries.remove();
+                    }
+                }//end while
+                
+                
+                peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"",joinAddress));//update finger table
                 peer.getFingerTable().printFingerTable();
             }
             else{
@@ -147,32 +178,8 @@ public class PeerProtocol implements Messages{
                 peer.getFingerTable().printFingerTable();
             }
 
-//                //TRANSFER CUSTODY OF REGISTERED FILES//
-//                Iterator entries = peer.getReferencedFiles().entrySet().iterator();
-//                while (entries.hasNext()) {//iterate through the files that are registered to you
-//                    Entry thisEntry = (Entry) entries.next();
-//                    int key = (int) thisEntry.getKey();
-//                    FileReference file = (FileReference) thisEntry.getValue();
-//                        
-//                    if(((peer.getID()<joinID) && ((joinID < file.getID()) || (file.getID()<peer.getID())))//check if there is a registered 
-//                        || ((peer.getID()>joinID) && (file.getID()<peer.getID() && file.getID()>joinID))){//file that will change custody 
-//                 
-//                        peer.getOutgoing().send(TRANS_REG
-//                            +REGEX+netID                         //network id
-//                            +REGEX+netPORT
-//                            +REGEX+file.getPublisherID()        //file publisher
-//                            +REGEX+file.getPublisherPort()
-//                            +REGEX+file.getID()                 //file metadata
-//                            +REGEX+file.getFileName(),
-//                        InetAddress.getLocalHost(), joinPORT);
-//                        
-//                        entries.remove();
-//                    }
-//                }//end while
-//                
-//                peer.getFingerTable().update(peer.getID(), new PeerReference(joinID+"",joinPORT+"","localhost"));
-//                peer.getFingerTable().printFingerTable();
-//            }
+             
+
         }//end FINDSUCCESSOR
         
         /*
@@ -449,7 +456,7 @@ public class PeerProtocol implements Messages{
             int fileID = Integer.parseInt(msg[5]);
             
             PeerConnection peer = Connections.getInstance().getPeerConnection().get(netID);
-            peer.openObjSender(RETRIEVE, requestID, requestPORT, requestADD, fileID);
+            peer.openObjSender(RETRIEVE, requestID, requestPORT, requestADD, fileID);//tcp send
         }//END INIT_SEND
         
         else if(msg[0].equalsIgnoreCase(INIT_RECEIVE)){
@@ -463,7 +470,7 @@ public class PeerProtocol implements Messages{
             int objPORT = Integer.parseInt(msg[5]);
             
             PeerConnection peer = Connections.getInstance().getPeerConnection().get(netID);
-            peer.openObjReceiver(RETRIEVE,senderID,senderPORT,senderADD,objPORT); 
+            peer.openObjReceiver(RETRIEVE,senderID,senderPORT,senderADD,objPORT);//tcp receive
         }//END INIT_RECEIVE
         
         else if(msg[0].equalsIgnoreCase(FAILRETRIEVE)){
@@ -529,24 +536,7 @@ public class PeerProtocol implements Messages{
 //                Connections.getInstance().getCachedNetworkFiles().put(fileID, senderID);
 //            }
 //        }
-
-
-
-        //        else if(msg[0].equalsIgnoreCase(READYTOPUBLISH)){
-//            String transferType = msg[1];
-//            int netID = Integer.parseInt(msg[2]);
-//            int netPORT = Integer.parseInt(msg[3]);
-//            
-//            int senderID  = Integer.parseInt(msg[4]);
-//            int senderPORT = Integer.parseInt(msg[5]);
-//            
-//            int objPORT = Integer.parseInt(msg[6]);
-//            //int fileID = Integer.parseInt(msg[7]);
-//            
-//            PeerConnection peer = (PeerConnection) Connections.getInstance().getPeerConnection().get(netID);
-//            peer.openObjReceiver(transferType,senderID,senderPORT,objPORT); 
-//        }
-       
+      
     }
 
     private static void printStatus(PeerConnection peer) {
